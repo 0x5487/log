@@ -53,7 +53,9 @@ func New(appID string) *Logger {
 }
 
 func (l *Logger) newEntry(level Level, message string, fields CustomFields, calldepth int) *Entry {
-	entry := l.entryPool.Get().(*Entry)
+	//entry := l.entryPool.Get().(*Entry)
+	entry := &Entry{}
+	entry.wg = &sync.WaitGroup{}
 	entry.Line = 0
 	entry.File = entry.File[0:0]
 	entry.calldepth = calldepth
@@ -96,5 +98,5 @@ func (l *Logger) HandleEntry(e *Entry) {
 		e.wg.Wait()
 	}
 
-	l.entryPool.Put(e)
+	//l.entryPool.Put(e)
 }
