@@ -3,29 +3,16 @@ package log
 import (
 	"fmt"
 	"os"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
 )
 
-// Level of the log
-type Level uint8
-
 // Logger is the default instance of the log package
 var (
 	exitFunc  = os.Exit
 	skipLevel = 2
-)
-
-// Log levels.
-const (
-	DebugLevel Level = iota
-	InfoLevel
-	WarnLevel
-	ErrorLevel
-	PanicLevel
-	AlertLevel
-	FatalLevel
 )
 
 // HandlerChannels is an array of handler channels
@@ -39,29 +26,42 @@ type Handler interface {
 }
 
 type Logger struct {
-	entryPool *sync.Pool
-	channels  LevelHandlerChannels
-	Name      string
-	AppID     string
+	entryPool        sync.Pool
+	channels         LevelHandlerChannels
+	callerInfoLevels [5]bool
+	Name             string
+	AppID            string
 }
 
-func New(appID string) *Logger {
-	return &Logger{
+func New() *Logger {
+	logger := &Logger{
 		channels: make(LevelHandlerChannels),
-		AppID:    appID,
+		callerInfoLevels: [5]bool{
+			true,
+			false,
+			false,
+			true,
+			true,
+		},
 	}
+
+	logger.entryPool.New = func() interface{} {
+		return &Entry{
+			wg: &sync.WaitGroup{},
+		}
+	}
+
+	return logger
 }
 
-func (l *Logger) newEntry(level Level, message string, fields CustomFields, calldepth int) *Entry {
-	//entry := l.entryPool.Get().(*Entry)
-	entry := &Entry{}
-	entry.wg = &sync.WaitGroup{}
+func (l *Logger) newEntry(level Level, message string, fields Fields) *Entry {
+	entry := l.entryPool.Get().(*Entry)
+	entry.logger = l
 	entry.Line = 0
-	entry.File = entry.File[0:0]
-	entry.calldepth = calldepth
+	entry.File = ""
 	entry.Level = level
-	entry.Message = strings.TrimRight(message, cutset) // need to trim for adding fields later in handlers + why send uneeded whitespace
-	entry.CustomFields = fields
+	entry.Message = strings.TrimSpace(message)
+	entry.Fields = fields
 	entry.Timestamp = time.Now().UTC()
 
 	return entry
@@ -82,12 +82,49 @@ func (l *Logger) RegisterHandler(handler Handler, levels ...Level) {
 	}
 }
 
-func (l *Logger) Info(v ...interface{}) {
-	e := l.newEntry(InfoLevel, fmt.Sprint(v...), nil, skipLevel)
-	l.HandleEntry(e)
+// Debug level formatted message.
+func (l *Logger) Debug(v ...interface{}) {
+	e := l.newEntry(DebugLevel, fmt.Sprint(v...), nil)
+	l.handleEntry(e)
 }
 
-func (l *Logger) HandleEntry(e *Entry) {
+// Info level formatted message.
+func (l *Logger) Info(v ...interface{}) {
+	e := l.newEntry(InfoLevel, fmt.Sprint(v...), nil)
+	l.handleEntry(e)
+}
+
+// Warning level formatted message.
+func (l *Logger) Warning(v ...interface{}) {
+	e := l.newEntry(WarningLevel, fmt.Sprint(v...), nil)
+	l.handleEntry(e)
+}
+
+// Error level formatted message, followed by an exit.
+func (l *Logger) Error(v ...interface{}) {
+	e := l.newEntry(ErrorLevel, fmt.Sprint(v...), nil)
+	l.handleEntry(e)
+}
+
+// Fatal level formatted message, followed by an exit.
+func (l *Logger) Fatal(v ...interface{}) {
+	e := l.newEntry(FatalLevel, fmt.Sprint(v...), nil)
+	l.handleEntry(e)
+	exitFunc(1)
+}
+
+// WithFields returns a log Entry with fields set
+func (l *Logger) WithFields(fields Fields) *Entry {
+	e := l.newEntry(InfoLevel, "", fields)
+	l.handleEntry(e)
+	return e
+}
+
+func (l *Logger) handleEntry(e *Entry) {
+	if e.Line == 0 && l.callerInfoLevels[e.Level] {
+		_, e.File, e.Line, _ = runtime.Caller(2)
+	}
+
 	channels, ok := l.channels[e.Level]
 
 	if ok {
@@ -98,5 +135,5 @@ func (l *Logger) HandleEntry(e *Entry) {
 		e.wg.Wait()
 	}
 
-	//l.entryPool.Put(e)
+	l.entryPool.Put(e)
 }

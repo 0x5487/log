@@ -2,8 +2,9 @@ package console
 
 import (
 	"fmt"
+	"strings"
 
-	"jasonsoft/log"
+	"github.com/jasonsoft/log"
 )
 
 // Console is an instance of the console logger
@@ -44,8 +45,19 @@ func (c *Console) Run() chan<- *log.Entry {
 }
 
 func FormatFunc(entry *log.Entry) string {
-	time := entry.Timestamp.String()
-	level := entry.Level
+	time := entry.Timestamp.Format("2006-01-02T15:04:05.999")
+	level := entry.Level.String()
 
-	return fmt.Sprintf("%s [%s] %s", time, level, entry.Message)
+	strFields := ""
+	for key, value := range entry.Fields {
+		strFields += key + "=" + value.(string) + " "
+	}
+
+	result := fmt.Sprintf("time=\"%s\" level=%s msg=\"%s\" file=%s line=%d ", time, level, entry.Message, entry.File, entry.Line)
+
+	if len(strFields) > 0 {
+		result += strings.TrimSpace(strFields)
+	}
+
+	return result
 }
