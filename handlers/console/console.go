@@ -53,7 +53,7 @@ func FormatFunc(entry *log.Entry) string {
 		strFields += key + "=" + value.(string) + " "
 	}
 
-	result := fmt.Sprintf("time=\"%s\" level=%s msg=\"%s\" ", time, level, entry.Message, entry.File, entry.Line)
+	result := fmt.Sprintf("time=\"%s\" level=%s msg=\"%s\" ", time, level, entry.Message)
 
 	if len(strFields) > 0 {
 		result += strings.TrimSpace(strFields)
