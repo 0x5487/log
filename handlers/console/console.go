@@ -21,23 +21,14 @@ func (c *Console) Run() chan<- *log.Entry {
 	ch := make(chan *log.Entry, 3000)
 
 	go func(entries <-chan *log.Entry) {
-		/*
-			for {
-				select {
-				case message := <-entries:
-					println(message.Message)
-					message.Consumed()
-				default:
-					println("no msg")
-				}
-
-			}*/
-
-		var e *log.Entry
-		for e = range entries {
-			msg := FormatFunc(e)
-			println(msg)
-			e.Consumed()
+		for {
+			select {
+			case e := <-entries:
+				msg := FormatFunc(e)
+				println(msg)
+				e.Consumed()
+			default:
+			}
 		}
 	}(ch)
 
@@ -45,7 +36,7 @@ func (c *Console) Run() chan<- *log.Entry {
 }
 
 func FormatFunc(entry *log.Entry) string {
-	time := entry.Timestamp.Format("2006-01-02T15:04:05.999")
+	time := entry.Timestamp.Format("2006-01-02 15:04:05.999")
 	level := entry.Level.String()
 
 	strFields := ""

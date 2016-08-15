@@ -29,7 +29,6 @@ type Logger struct {
 	entryPool        sync.Pool
 	channels         LevelHandlerChannels
 	callerInfoLevels [5]bool
-	Name             string
 	AppID            string
 }
 
