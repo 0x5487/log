@@ -12,6 +12,8 @@ type Entry struct {
 	wg     *sync.WaitGroup
 	logger *Logger
 
+	AppID     string
+	Host      string
 	Level     Level  `json:"level"`
 	Message   string `json:"message"`
 	File      string

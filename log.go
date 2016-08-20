@@ -26,14 +26,17 @@ type Handler interface {
 }
 
 type Logger struct {
+	host             string
 	entryPool        sync.Pool
 	channels         LevelHandlerChannels
 	callerInfoLevels [5]bool
-	AppID            string
+	appID            string
 }
 
 func New() *Logger {
+	hostname, _ := os.Hostname()
 	logger := &Logger{
+		host:     hostname,
 		channels: make(LevelHandlerChannels),
 		callerInfoLevels: [5]bool{
 			true,
@@ -56,6 +59,8 @@ func New() *Logger {
 func (l *Logger) newEntry(level Level, message string, fields Fields) *Entry {
 	entry := l.entryPool.Get().(*Entry)
 	entry.logger = l
+	entry.Host = l.host
+	entry.AppID = l.appID
 	entry.Line = 0
 	entry.File = ""
 	entry.Level = level
@@ -115,8 +120,18 @@ func (l *Logger) Fatal(v ...interface{}) {
 // WithFields returns a log Entry with fields set
 func (l *Logger) WithFields(fields Fields) *Entry {
 	e := l.newEntry(InfoLevel, "", fields)
-	l.handleEntry(e)
 	return e
+}
+
+// SetAppID set a constant application key
+// that will be set on all log Entry objects
+func (l *Logger) SetAppID(id string) {
+	l.appID = id
+}
+
+// AppID return an application key
+func (l *Logger) AppID() string {
+	return l.appID
 }
 
 func (l *Logger) handleEntry(e *Entry) {

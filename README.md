@@ -1,7 +1,11 @@
 # log
 It is a simple log library for golang
 
-## Example
+#### Supported handlers
+* console
+* gelf (graylog)
+
+#### Example
 
 ```golang
 package main
