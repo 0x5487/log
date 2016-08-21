@@ -7,7 +7,7 @@ It is a simple log library for golang
 
 ## Example
 
-```golang
+```go
 package main
 
 import (
