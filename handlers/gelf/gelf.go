@@ -36,20 +36,24 @@ func (g *Gelf) Run() chan<- *log.Entry {
 		for {
 			select {
 			case e := <-entries:
-				if g.conn != nil {
-					payload := entryToPayload(e)
-					payload = append(payload, empty) // when we use tcp, we need to add null byte in the end.
-					_, err := g.conn.Write(payload)
-					if err != nil {
-						println("failed to write: %v", err)
-						g.conn.Close()
-						g.conn = nil
-					} else {
-						//msg := fmt.Sprintf("payload size: %d", size)
-						//println(msg)
-					}
-				}
+				cpE := *e // create copy to be used inside the goroutine
 				e.Consumed()
+				go func(copiedEntry *log.Entry) {
+					// we need to use goroutine here.  otherwise, the channel will be blocked.
+					if g.conn != nil {
+						payload := entryToPayload(copiedEntry)
+						payload = append(payload, empty) // when we use tcp, we need to add null byte in the end.
+						_, err := g.conn.Write(payload)
+						if err != nil {
+							println("failed to write: %v", err)
+							g.conn.Close()
+							g.conn = nil
+						} else {
+							//msg := fmt.Sprintf("payload size: %d", size)
+							//println(msg)
+						}
+					}
+				}(&cpE)
 			default:
 				// non-block
 			}
@@ -98,9 +102,19 @@ func entryToPayload(e *log.Entry) []byte {
 	items["full_message"] = e.Message
 	items["timestamp"] = float64(e.Timestamp.UnixNano()) / float64(time.Second)
 	items["_app_id"] = e.AppID
+	items["_file"] = e.File
+
+	if e.Line > 0 {
+		items["_line"] = e.Line
+	}
 
 	for k, v := range e.Fields {
-		items["_"+k] = v
+		switch k {
+		case "short_message":
+			items[k] = v
+		default:
+			items["_"+k] = v
+		}
 	}
 
 	payload, _ := json.Marshal(items)
@@ -113,7 +127,7 @@ func toGelfLevel(level log.Level) uint8 {
 		return 7
 	case log.InfoLevel:
 		return 6
-	case log.WarningLevel:
+	case log.WarnLevel:
 		return 4
 	case log.ErrorLevel:
 		return 3

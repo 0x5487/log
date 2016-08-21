@@ -39,8 +39,8 @@ func (e *Entry) Info(v ...interface{}) {
 }
 
 // Warning level message.
-func (e *Entry) Warning(v ...interface{}) {
-	e.Level = WarningLevel
+func (e *Entry) Warn(v ...interface{}) {
+	e.Level = WarnLevel
 	e.Message = fmt.Sprint(v...)
 
 	e.logger.handleEntry(e)

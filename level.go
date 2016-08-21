@@ -7,15 +7,24 @@ type Level uint8
 const (
 	DebugLevel Level = iota
 	InfoLevel
-	WarningLevel
+	WarnLevel
 	ErrorLevel
 	FatalLevel
 )
 
+// AllLevels is an array of all log levels, for easier registering of all levels to a handler
+var AllLevels = []Level{
+	DebugLevel,
+	InfoLevel,
+	WarnLevel,
+	ErrorLevel,
+	FatalLevel,
+}
+
 var levelNames = []string{
 	"DEBUG",
 	"INFO",
-	"WARNING",
+	"WARN",
 	"ERROR",
 	"FATAL",
 }

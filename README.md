@@ -1,35 +1,45 @@
 # log
 It is a simple log library for golang
 
-#### Supported handlers
+## Supported handlers
 * console
 * gelf (graylog)
 
-#### Example
+## Example
 
 ```golang
 package main
 
 import (
+	"time"
+
 	"github.com/jasonsoft/log"
 	"github.com/jasonsoft/log/handlers/console"
+	"github.com/jasonsoft/log/handlers/gelf"
 )
 
 func main() {
-	cLog := console.New()
+	clog := console.New()
+	graylog := gelf.New("tcp://192.168.1.1:12201")
 
 	logger := log.New()
-	logger.RegisterHandler(cLog, log.DebugLevel, log.InfoLevel, log.ErrorLevel)
+	logger.SetAppID("TesterApp") // unique id for the app
+	logger.RegisterHandler(clog, log.AllLevels...)
+	logger.RegisterHandler(graylog, log.AllLevels...)
 
-	logger.Debug("hello world")
+	startTime := time.Now()
+	for i := 0; i < 1000; i++ {
+		logger.Debug("hello world")
+		customFields := log.Fields{
+			"city":     "keelung",
+			"country": "taiwan",
+		}
 
-	customFields := log.Fields{
-		"car":     "bmw",
-		"country": "taiwan",
+		logger.WithFields(customFields).Info("more info")
+		logger.Error("oops...")
 	}
-
-	logger.WithFields(customFields).Info("more info")
-
-	logger.Error("oops...")
+	duration := int64(time.Since(startTime) / time.Millisecond)
+	println(duration)
 }
+
 ```

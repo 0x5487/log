@@ -67,7 +67,6 @@ func (l *Logger) newEntry(level Level, message string, fields Fields) *Entry {
 	entry.Message = strings.TrimSpace(message)
 	entry.Fields = fields
 	entry.Timestamp = time.Now().UTC()
-
 	return entry
 }
 
@@ -99,8 +98,8 @@ func (l *Logger) Info(v ...interface{}) {
 }
 
 // Warning level formatted message.
-func (l *Logger) Warning(v ...interface{}) {
-	e := l.newEntry(WarningLevel, fmt.Sprint(v...), nil)
+func (l *Logger) Warn(v ...interface{}) {
+	e := l.newEntry(WarnLevel, fmt.Sprint(v...), nil)
 	l.handleEntry(e)
 }
 
