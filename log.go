@@ -97,19 +97,27 @@ func (l *Logger) Info(v ...interface{}) {
 	l.handleEntry(e)
 }
 
-// Warning level formatted message.
+// Warn level formatted message.
 func (l *Logger) Warn(v ...interface{}) {
 	e := l.newEntry(WarnLevel, fmt.Sprint(v...), nil)
 	l.handleEntry(e)
 }
 
-// Error level formatted message, followed by an exit.
+// Error level formatted message.
 func (l *Logger) Error(v ...interface{}) {
 	e := l.newEntry(ErrorLevel, fmt.Sprint(v...), nil)
 	l.handleEntry(e)
 }
 
-// Fatal level formatted message, followed by an exit.
+// Panic level formatted message.
+func (l *Logger) Panic(v ...interface{}) {
+	s := fmt.Sprint(v...)
+	e := l.newEntry(FatalLevel, s, nil)
+	l.handleEntry(e)
+	panic(s)
+}
+
+// Fatal level formatted message.
 func (l *Logger) Fatal(v ...interface{}) {
 	e := l.newEntry(FatalLevel, fmt.Sprint(v...), nil)
 	l.handleEntry(e)

@@ -19,27 +19,28 @@ import (
 )
 
 func main() {
-	clog := console.New()
-	graylog := gelf.New("tcp://192.168.1.1:12201")
+	log.SetAppID("TesterApp") // unique id for the app
 
-	logger := log.New()
-	logger.SetAppID("TesterApp") // unique id for the app
-	logger.RegisterHandler(clog, log.AllLevels...)
-	logger.RegisterHandler(graylog, log.AllLevels...)
+	clog := console.New()
+	log.RegisterHandler(clog, log.AllLevels...)
+
+	graylog := gelf.New("tcp://192.168.1.1:12201")
+	log.RegisterHandler(graylog, log.AllLevels...)
 
 	startTime := time.Now()
 	for i := 0; i < 1000; i++ {
-		logger.Debug("hello world")
+		log.Debug("hello world")
 		customFields := log.Fields{
-			"city":     "keelung",
+			"city":    "keelung",
 			"country": "taiwan",
 		}
 
-		logger.WithFields(customFields).Info("more info")
-		logger.Error("oops...")
+		log.WithFields(customFields).Info("more info")
+		log.Error("oops...")
 	}
 	duration := int64(time.Since(startTime) / time.Millisecond)
 	println(duration)
-}
 
+	time.Sleep(5 * time.Second)
+}
 ```

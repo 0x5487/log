@@ -9,6 +9,7 @@ const (
 	InfoLevel
 	WarnLevel
 	ErrorLevel
+	PanicLevel
 	FatalLevel
 )
 
@@ -18,6 +19,7 @@ var AllLevels = []Level{
 	InfoLevel,
 	WarnLevel,
 	ErrorLevel,
+	PanicLevel,
 	FatalLevel,
 }
 
@@ -26,6 +28,7 @@ var levelNames = []string{
 	"INFO",
 	"WARN",
 	"ERROR",
+	"PANIC",
 	"FATAL",
 }
 
