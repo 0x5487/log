@@ -1,6 +1,9 @@
 package log
 
-import "fmt"
+import (
+	"fmt"
+	"runtime"
+)
 
 var (
 	_logger *Logger
@@ -59,6 +62,19 @@ func Fatal(v ...interface{}) {
 func WithFields(fields Fields) *Entry {
 	e := _logger.newEntry(InfoLevel, "", fields, skipLevel)
 	return e
+}
+
+// StackTrace creates a new log Entry with pre-populated field with stack trace.
+func StackTrace() *Entry {
+	trace := make([]byte, 1<<16)
+	n := runtime.Stack(trace, true)
+	if n > 7000 {
+		n = 7000
+	}
+	customFields := Fields{
+		"stack_trace": string(trace[:n]) + "\n",
+	}
+	return _logger.newEntry(DebugLevel, "", customFields, skipLevel)
 }
 
 // SetAppID set a constant application key
