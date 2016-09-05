@@ -1,5 +1,7 @@
 package log
 
+import "fmt"
+
 var (
 	_logger *Logger
 )
@@ -16,37 +18,47 @@ func RegisterHandler(handler Handler, levels ...Level) {
 
 // Debug level formatted message.
 func Debug(v ...interface{}) {
-	_logger.Debug(v...)
+	e := _logger.newEntry(DebugLevel, fmt.Sprint(v...), nil, skipLevel)
+	_logger.handleEntry(e)
 }
 
 // Info level formatted message.
 func Info(v ...interface{}) {
-	_logger.Info(v...)
+	e := _logger.newEntry(InfoLevel, fmt.Sprint(v...), nil, skipLevel)
+	_logger.handleEntry(e)
 }
 
 // Warn level formatted message.
 func Warn(v ...interface{}) {
-	_logger.Warn(v...)
+	e := _logger.newEntry(WarnLevel, fmt.Sprint(v...), nil, skipLevel)
+	_logger.handleEntry(e)
 }
 
 // Error level formatted message
 func Error(v ...interface{}) {
-	_logger.Error(v...)
+	e := _logger.newEntry(ErrorLevel, fmt.Sprint(v...), nil, skipLevel)
+	_logger.handleEntry(e)
 }
 
 // Panic level formatted message
 func Panic(v ...interface{}) {
-	_logger.Panic(v...)
+	s := fmt.Sprint(v...)
+	e := _logger.newEntry(PanicLevel, s, nil, skipLevel)
+	_logger.handleEntry(e)
+	panic(s)
 }
 
 // Fatal level formatted message, followed by an exit.
 func Fatal(v ...interface{}) {
-	_logger.Fatal(v...)
+	e := _logger.newEntry(FatalLevel, fmt.Sprint(v...), nil, skipLevel)
+	_logger.handleEntry(e)
+	exitFunc(1)
 }
 
 // WithFields returns a log Entry with fields set
 func WithFields(fields Fields) *Entry {
-	return _logger.WithFields(fields)
+	e := _logger.newEntry(InfoLevel, "", fields, skipLevel)
+	return e
 }
 
 // SetAppID set a constant application key

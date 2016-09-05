@@ -56,9 +56,10 @@ func New() *Logger {
 	return logger
 }
 
-func (l *Logger) newEntry(level Level, message string, fields Fields) *Entry {
+func (l *Logger) newEntry(level Level, message string, fields Fields, calldepth int) *Entry {
 	entry := l.entryPool.Get().(*Entry)
 	entry.logger = l
+	entry.calldepth = calldepth
 	entry.Host = l.host
 	entry.AppID = l.appID
 	entry.Line = 0
@@ -87,46 +88,46 @@ func (l *Logger) RegisterHandler(handler Handler, levels ...Level) {
 
 // Debug level formatted message.
 func (l *Logger) Debug(v ...interface{}) {
-	e := l.newEntry(DebugLevel, fmt.Sprint(v...), nil)
+	e := l.newEntry(DebugLevel, fmt.Sprint(v...), nil, skipLevel)
 	l.handleEntry(e)
 }
 
 // Info level formatted message.
 func (l *Logger) Info(v ...interface{}) {
-	e := l.newEntry(InfoLevel, fmt.Sprint(v...), nil)
+	e := l.newEntry(InfoLevel, fmt.Sprint(v...), nil, skipLevel)
 	l.handleEntry(e)
 }
 
 // Warn level formatted message.
 func (l *Logger) Warn(v ...interface{}) {
-	e := l.newEntry(WarnLevel, fmt.Sprint(v...), nil)
+	e := l.newEntry(WarnLevel, fmt.Sprint(v...), nil, skipLevel)
 	l.handleEntry(e)
 }
 
 // Error level formatted message.
 func (l *Logger) Error(v ...interface{}) {
-	e := l.newEntry(ErrorLevel, fmt.Sprint(v...), nil)
+	e := l.newEntry(ErrorLevel, fmt.Sprint(v...), nil, skipLevel)
 	l.handleEntry(e)
 }
 
 // Panic level formatted message.
 func (l *Logger) Panic(v ...interface{}) {
 	s := fmt.Sprint(v...)
-	e := l.newEntry(FatalLevel, s, nil)
+	e := l.newEntry(PanicLevel, s, nil, skipLevel)
 	l.handleEntry(e)
 	panic(s)
 }
 
 // Fatal level formatted message.
 func (l *Logger) Fatal(v ...interface{}) {
-	e := l.newEntry(FatalLevel, fmt.Sprint(v...), nil)
+	e := l.newEntry(FatalLevel, fmt.Sprint(v...), nil, skipLevel)
 	l.handleEntry(e)
 	exitFunc(1)
 }
 
 // WithFields returns a log Entry with fields set
 func (l *Logger) WithFields(fields Fields) *Entry {
-	e := l.newEntry(InfoLevel, "", fields)
+	e := l.newEntry(InfoLevel, "", fields, skipLevel)
 	return e
 }
 
@@ -143,11 +144,10 @@ func (l *Logger) AppID() string {
 
 func (l *Logger) handleEntry(e *Entry) {
 	if e.Line == 0 && l.callerInfoLevels[e.Level] {
-		_, e.File, e.Line, _ = runtime.Caller(2)
+		_, e.File, e.Line, _ = runtime.Caller(e.calldepth)
 	}
 
 	channels, ok := l.channels[e.Level]
-
 	if ok {
 		e.wg.Add(len(channels))
 		for _, ch := range channels {

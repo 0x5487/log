@@ -9,8 +9,9 @@ import (
 type Fields map[string]interface{}
 
 type Entry struct {
-	wg     *sync.WaitGroup
-	logger *Logger
+	wg        *sync.WaitGroup
+	logger    *Logger
+	calldepth int
 
 	AppID     string
 	Host      string
