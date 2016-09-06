@@ -36,7 +36,7 @@ func (c *Console) Run() chan<- *log.Entry {
 }
 
 func FormatFunc(entry *log.Entry) string {
-	time := entry.Timestamp.Format("2006-01-02 15:04:05.999")
+	time := entry.Timestamp.Format("2006-01-02T15:04:05.999Z")
 	level := entry.Level.String()
 
 	strFields := ""
