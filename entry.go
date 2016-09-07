@@ -43,7 +43,6 @@ func (e *Entry) Info(v ...interface{}) {
 func (e *Entry) Warn(v ...interface{}) {
 	e.Level = WarnLevel
 	e.Message = fmt.Sprint(v...)
-
 	e.logger.handleEntry(e)
 }
 
@@ -51,16 +50,23 @@ func (e *Entry) Warn(v ...interface{}) {
 func (e *Entry) Error(v ...interface{}) {
 	e.Level = ErrorLevel
 	e.Message = fmt.Sprint(v...)
-
 	e.logger.handleEntry(e)
+}
+
+// Panic level message.
+func (e *Entry) Panic(v ...interface{}) {
+	e.Level = PanicLevel
+	e.Message = fmt.Sprint(v...)
+	e.logger.handleEntry(e)
+	panic(e.Message)
 }
 
 // Fatal level message.
 func (e *Entry) Fatal(v ...interface{}) {
 	e.Level = FatalLevel
 	e.Message = fmt.Sprint(v...)
-
 	e.logger.handleEntry(e)
+	exitFunc(1)
 }
 
 // Consumed lets the Entry and subsequently the Logger
