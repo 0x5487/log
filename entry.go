@@ -10,7 +10,7 @@ type Fields map[string]interface{}
 
 type Entry struct {
 	wg        *sync.WaitGroup
-	logger    *Logger
+	logger    *logger
 	calldepth int
 
 	AppID     string

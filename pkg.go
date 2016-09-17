@@ -6,11 +6,11 @@ import (
 )
 
 var (
-	_logger *Logger
+	_logger *logger
 )
 
 func init() {
-	_logger = New()
+	_logger = new()
 }
 
 // RegisterHandler adds a new Log Handler and specifies what log levels
@@ -59,13 +59,13 @@ func Fatal(v ...interface{}) {
 }
 
 // WithFields returns a log Entry with fields set
-func WithFields(fields Fields) *Entry {
+func WithFields(fields Fields) Logger {
 	e := _logger.newEntry(InfoLevel, "", fields, skipLevel)
 	return e
 }
 
 // StackTrace creates a new log Entry with pre-populated field with stack trace.
-func StackTrace() *Entry {
+func StackTrace() Logger {
 	trace := make([]byte, 1<<16)
 	n := runtime.Stack(trace, true)
 	if n > 7000 {

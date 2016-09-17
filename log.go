@@ -15,6 +15,15 @@ var (
 	skipLevel = 2
 )
 
+// Logger interface for logging
+type Logger interface {
+	Debug(v ...interface{})
+	Info(v ...interface{})
+	Warn(v ...interface{})
+	Error(v ...interface{})
+	Fatal(v ...interface{})
+}
+
 // HandlerChannels is an array of handler channels
 type HandlerChannels []chan<- *Entry
 
@@ -25,7 +34,7 @@ type Handler interface {
 	Run() chan<- *Entry
 }
 
-type Logger struct {
+type logger struct {
 	host             string
 	entryPool        sync.Pool
 	channels         LevelHandlerChannels
@@ -33,9 +42,9 @@ type Logger struct {
 	appID            string
 }
 
-func New() *Logger {
+func new() *logger {
 	hostname, _ := os.Hostname()
-	logger := &Logger{
+	logger := &logger{
 		host:     hostname,
 		channels: make(LevelHandlerChannels),
 		callerInfoLevels: [5]bool{
@@ -56,7 +65,7 @@ func New() *Logger {
 	return logger
 }
 
-func (l *Logger) newEntry(level Level, message string, fields Fields, calldepth int) *Entry {
+func (l *logger) newEntry(level Level, message string, fields Fields, calldepth int) *Entry {
 	entry := l.entryPool.Get().(*Entry)
 	entry.logger = l
 	entry.calldepth = calldepth
@@ -73,7 +82,7 @@ func (l *Logger) newEntry(level Level, message string, fields Fields, calldepth 
 
 // RegisterHandler adds a new Log Handler and specifies what log levels
 // the handler will be passed log entries for
-func (l *Logger) RegisterHandler(handler Handler, levels ...Level) {
+func (l *logger) RegisterHandler(handler Handler, levels ...Level) {
 	ch := handler.Run()
 
 	for _, level := range levels {
@@ -87,31 +96,31 @@ func (l *Logger) RegisterHandler(handler Handler, levels ...Level) {
 }
 
 // Debug level formatted message.
-func (l *Logger) Debug(v ...interface{}) {
+func (l *logger) Debug(v ...interface{}) {
 	e := l.newEntry(DebugLevel, fmt.Sprint(v...), nil, skipLevel)
 	l.handleEntry(e)
 }
 
 // Info level formatted message.
-func (l *Logger) Info(v ...interface{}) {
+func (l *logger) Info(v ...interface{}) {
 	e := l.newEntry(InfoLevel, fmt.Sprint(v...), nil, skipLevel)
 	l.handleEntry(e)
 }
 
 // Warn level formatted message.
-func (l *Logger) Warn(v ...interface{}) {
+func (l *logger) Warn(v ...interface{}) {
 	e := l.newEntry(WarnLevel, fmt.Sprint(v...), nil, skipLevel)
 	l.handleEntry(e)
 }
 
 // Error level formatted message.
-func (l *Logger) Error(v ...interface{}) {
+func (l *logger) Error(v ...interface{}) {
 	e := l.newEntry(ErrorLevel, fmt.Sprint(v...), nil, skipLevel)
 	l.handleEntry(e)
 }
 
 // Panic level formatted message.
-func (l *Logger) Panic(v ...interface{}) {
+func (l *logger) Panic(v ...interface{}) {
 	s := fmt.Sprint(v...)
 	e := l.newEntry(PanicLevel, s, nil, skipLevel)
 	l.handleEntry(e)
@@ -119,30 +128,30 @@ func (l *Logger) Panic(v ...interface{}) {
 }
 
 // Fatal level formatted message.
-func (l *Logger) Fatal(v ...interface{}) {
+func (l *logger) Fatal(v ...interface{}) {
 	e := l.newEntry(FatalLevel, fmt.Sprint(v...), nil, skipLevel)
 	l.handleEntry(e)
 	exitFunc(1)
 }
 
 // WithFields returns a log Entry with fields set
-func (l *Logger) WithFields(fields Fields) *Entry {
+func (l *logger) WithFields(fields Fields) Logger {
 	e := l.newEntry(InfoLevel, "", fields, skipLevel)
 	return e
 }
 
 // SetAppID set a constant application key
 // that will be set on all log Entry objects
-func (l *Logger) SetAppID(id string) {
+func (l *logger) SetAppID(id string) {
 	l.appID = id
 }
 
 // AppID return an application key
-func (l *Logger) AppID() string {
+func (l *logger) AppID() string {
 	return l.appID
 }
 
-func (l *Logger) handleEntry(e *Entry) {
+func (l *logger) handleEntry(e *Entry) {
 	if e.Line == 0 && l.callerInfoLevels[e.Level] {
 		_, e.File, e.Line, _ = runtime.Caller(e.calldepth)
 	}
