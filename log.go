@@ -22,6 +22,7 @@ type Logger interface {
 	Warn(v ...interface{})
 	Error(v ...interface{})
 	Fatal(v ...interface{})
+	Panic(v ...interface{})
 }
 
 // HandlerChannels is an array of handler channels
