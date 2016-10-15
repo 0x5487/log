@@ -18,11 +18,17 @@ var (
 // Logger interface for logging
 type Logger interface {
 	Debug(v ...interface{})
+	Debugf(msg string, v ...interface{})
 	Info(v ...interface{})
+	Infof(msg string, v ...interface{})
 	Warn(v ...interface{})
+	Warnf(msg string, v ...interface{})
 	Error(v ...interface{})
+	Errorf(msg string, v ...interface{})
 	Fatal(v ...interface{})
+	Fatalf(msg string, v ...interface{})
 	Panic(v ...interface{})
+	Panicf(msg string, v ...interface{})
 }
 
 // HandlerChannels is an array of handler channels
@@ -102,9 +108,21 @@ func (l *logger) Debug(v ...interface{}) {
 	l.handleEntry(e)
 }
 
+// Debugf level formatted message.
+func (l *logger) Debugf(msg string, v ...interface{}) {
+	e := l.newEntry(DebugLevel, fmt.Sprintf(msg, v...), nil, skipLevel)
+	l.handleEntry(e)
+}
+
 // Info level formatted message.
 func (l *logger) Info(v ...interface{}) {
 	e := l.newEntry(InfoLevel, fmt.Sprint(v...), nil, skipLevel)
+	l.handleEntry(e)
+}
+
+// Infof level formatted message.
+func (l *logger) Infof(msg string, v ...interface{}) {
+	e := l.newEntry(InfoLevel, fmt.Sprintf(msg, v...), nil, skipLevel)
 	l.handleEntry(e)
 }
 
@@ -114,9 +132,21 @@ func (l *logger) Warn(v ...interface{}) {
 	l.handleEntry(e)
 }
 
+// Warnf level formatted message.
+func (l *logger) Warnf(msg string, v ...interface{}) {
+	e := l.newEntry(WarnLevel, fmt.Sprintf(msg, v...), nil, skipLevel)
+	l.handleEntry(e)
+}
+
 // Error level formatted message.
 func (l *logger) Error(v ...interface{}) {
 	e := l.newEntry(ErrorLevel, fmt.Sprint(v...), nil, skipLevel)
+	l.handleEntry(e)
+}
+
+// Errorf level formatted message.
+func (l *logger) Errorf(msg string, v ...interface{}) {
+	e := l.newEntry(ErrorLevel, fmt.Sprintf(msg, v...), nil, skipLevel)
 	l.handleEntry(e)
 }
 
@@ -128,9 +158,24 @@ func (l *logger) Panic(v ...interface{}) {
 	panic(s)
 }
 
+// Panic level formatted message.
+func (l *logger) Panicf(msg string, v ...interface{}) {
+	s := fmt.Sprintf(msg, v...)
+	e := l.newEntry(PanicLevel, s, nil, skipLevel)
+	l.handleEntry(e)
+	panic(s)
+}
+
 // Fatal level formatted message.
 func (l *logger) Fatal(v ...interface{}) {
 	e := l.newEntry(FatalLevel, fmt.Sprint(v...), nil, skipLevel)
+	l.handleEntry(e)
+	exitFunc(1)
+}
+
+// Fatal level formatted message.
+func (l *logger) Fatalf(msg string, v ...interface{}) {
+	e := l.newEntry(FatalLevel, fmt.Sprintf(msg, v...), nil, skipLevel)
 	l.handleEntry(e)
 	exitFunc(1)
 }

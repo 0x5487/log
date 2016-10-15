@@ -25,9 +25,21 @@ func Debug(v ...interface{}) {
 	_logger.handleEntry(e)
 }
 
+// Debugf level formatted message.
+func Debugf(msg string, v ...interface{}) {
+	e := _logger.newEntry(DebugLevel, fmt.Sprintf(msg, v...), nil, skipLevel)
+	_logger.handleEntry(e)
+}
+
 // Info level formatted message.
 func Info(v ...interface{}) {
 	e := _logger.newEntry(InfoLevel, fmt.Sprint(v...), nil, skipLevel)
+	_logger.handleEntry(e)
+}
+
+// Infof level formatted message.
+func Infof(msg string, v ...interface{}) {
+	e := _logger.newEntry(InfoLevel, fmt.Sprintf(msg, v...), nil, skipLevel)
 	_logger.handleEntry(e)
 }
 
@@ -37,9 +49,21 @@ func Warn(v ...interface{}) {
 	_logger.handleEntry(e)
 }
 
+// Warnf level formatted message.
+func Warnf(msg string, v ...interface{}) {
+	e := _logger.newEntry(WarnLevel, fmt.Sprintf(msg, v...), nil, skipLevel)
+	_logger.handleEntry(e)
+}
+
 // Error level formatted message
 func Error(v ...interface{}) {
 	e := _logger.newEntry(ErrorLevel, fmt.Sprint(v...), nil, skipLevel)
+	_logger.handleEntry(e)
+}
+
+// Errorf level formatted message
+func Errorf(msg string, v ...interface{}) {
+	e := _logger.newEntry(ErrorLevel, fmt.Sprintf(msg, v...), nil, skipLevel)
 	_logger.handleEntry(e)
 }
 
@@ -51,9 +75,24 @@ func Panic(v ...interface{}) {
 	panic(s)
 }
 
+// Panicf level formatted message
+func Panicf(msg string, v ...interface{}) {
+	s := fmt.Sprintf(msg, v...)
+	e := _logger.newEntry(PanicLevel, s, nil, skipLevel)
+	_logger.handleEntry(e)
+	panic(s)
+}
+
 // Fatal level formatted message, followed by an exit.
 func Fatal(v ...interface{}) {
 	e := _logger.newEntry(FatalLevel, fmt.Sprint(v...), nil, skipLevel)
+	_logger.handleEntry(e)
+	exitFunc(1)
+}
+
+// Fatalf level formatted message, followed by an exit.
+func Fatalf(msg string, v ...interface{}) {
+	e := _logger.newEntry(FatalLevel, fmt.Sprintf(msg, v...), nil, skipLevel)
 	_logger.handleEntry(e)
 	exitFunc(1)
 }
