@@ -45,7 +45,7 @@ type logger struct {
 	host             string
 	entryPool        sync.Pool
 	channels         LevelHandlerChannels
-	callerInfoLevels [5]bool
+	callerInfoLevels [6]bool
 	appID            string
 }
 
@@ -54,10 +54,11 @@ func new() *logger {
 	logger := &logger{
 		host:     hostname,
 		channels: make(LevelHandlerChannels),
-		callerInfoLevels: [5]bool{
+		callerInfoLevels: [6]bool{
 			true,
 			false,
 			false,
+			true,
 			true,
 			true,
 		},
