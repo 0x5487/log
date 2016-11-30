@@ -21,14 +21,11 @@ func (c *Console) Run() chan<- *log.Entry {
 	ch := make(chan *log.Entry, 3000)
 
 	go func(entries <-chan *log.Entry) {
-		for {
-			select {
-			case e := <-entries:
-				msg := FormatFunc(e)
-				println(msg)
-				e.Consumed()
-			default:
-			}
+		var e *log.Entry
+		for e = range entries {
+			msg := FormatFunc(e)
+			println(msg)
+			e.Consumed()
 		}
 	}(ch)
 
