@@ -29,6 +29,7 @@ type Logger interface {
 	Fatalf(msg string, v ...interface{})
 	Panic(v ...interface{})
 	Panicf(msg string, v ...interface{})
+	WithFields(fields Fields) Logger
 }
 
 // HandlerChannels is an array of handler channels

@@ -111,6 +111,14 @@ func (e *Entry) Fatalf(msg string, v ...interface{}) {
 	exitFunc(1)
 }
 
+// WithFields adds the provided fieldsto the current entry
+func (e *Entry) WithFields(fields Fields) Logger {
+	for k, val := range fields {
+		e.Fields[k] = val
+	}
+	return e
+}
+
 // Consumed lets the Entry and subsequently the Logger
 // instance know that it has been used by a handler
 func (e *Entry) Consumed() {
