@@ -1,12 +1,17 @@
 package log
 
 import (
+	"context"
 	"fmt"
 	"runtime"
 )
 
 var (
 	_logger *logger
+)
+
+const (
+	requestIdKey int = iota
 )
 
 func init() {
@@ -125,4 +130,18 @@ func SetAppID(id string) {
 // AppID return an application key
 func AppID() string {
 	return _logger.appID
+}
+
+// NewContext return a new context with a logger value
+func NewContext(ctx context.Context, logger Logger) context.Context {
+	return context.WithValue(ctx, requestIdKey, logger)
+}
+
+// FromContext return a logger from the context
+func FromContext(ctx context.Context) Logger {
+	val, ok := ctx.Value(requestIdKey).(*Entry)
+	if ok {
+		return val
+	}
+	return _logger
 }
