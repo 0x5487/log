@@ -1,5 +1,5 @@
 # log
-It is a simple log library for golang
+It is a simple log library for golang.  Golang standard context is Supported.
 
 ## Supported handlers
 * console
