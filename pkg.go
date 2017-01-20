@@ -10,10 +10,6 @@ var (
 	_logger *logger
 )
 
-const (
-	requestIdKey int = iota
-)
-
 func init() {
 	_logger = new()
 }
@@ -131,6 +127,10 @@ func SetAppID(id string) {
 func AppID() string {
 	return _logger.appID
 }
+
+const (
+	requestIdKey = "log_requestIdKey"
+)
 
 // NewContext return a new context with a logger value
 func NewContext(ctx context.Context, logger Logger) context.Context {
