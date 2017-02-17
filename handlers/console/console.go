@@ -38,7 +38,7 @@ func FormatFunc(entry *log.Entry) string {
 
 	strFields := ""
 	for key, value := range entry.Fields {
-		strFields += key + "=" + value.(string) + " "
+		strFields += fmt.Sprintf("%s=%#v ", key, value)
 	}
 
 	var result string
