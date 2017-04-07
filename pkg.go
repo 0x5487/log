@@ -106,13 +106,10 @@ func WithFields(fields Fields) Logger {
 
 // StackTrace creates a new log Entry with pre-populated field with stack trace.
 func StackTrace() Logger {
-	trace := make([]byte, 1<<16)
-	n := runtime.Stack(trace, true)
-	if n > 7000 {
-		n = 7000
-	}
+	trace := make([]byte, 4096)
+	runtime.Stack(trace, true)
 	customFields := Fields{
-		"stack_trace": string(trace[:n]) + "\n",
+		"stack_trace": string(trace) + "\n",
 	}
 	return _logger.newEntry(DebugLevel, "", customFields, skipLevel)
 }

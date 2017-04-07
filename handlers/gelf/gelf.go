@@ -35,24 +35,20 @@ func (g *Gelf) Run() chan<- *log.Entry {
 		var empty byte
 		var e *log.Entry
 		for e = range entries {
-			cpE := *e // create copy to be used inside the goroutine
-			e.Consumed()
-			go func(copiedEntry *log.Entry) {
-				// we need to use goroutine here.  otherwise, the channel will be blocked.
-				if g.conn != nil {
-					payload := entryToPayload(copiedEntry)
-					payload = append(payload, empty) // when we use tcp, we need to add null byte in the end.
-					_, err := g.conn.Write(payload)
-					if err != nil {
-						println("failed to write: %v", err)
-						g.conn.Close()
-						g.conn = nil
-					} else {
-						//msg := fmt.Sprintf("payload size: %d", size)
-						//println(msg)
-					}
+			if g.conn != nil {
+				payload := entryToPayload(e)
+				payload = append(payload, empty) // when we use tcp, we need to add null byte in the end.
+				_, err := g.conn.Write(payload)
+				if err != nil {
+					println("failed to write: %v", err)
+					g.conn.Close()
+					g.conn = nil
+				} else {
+					//msg := fmt.Sprintf("payload size: %d", size)
+					//println(msg)
 				}
-			}(&cpE)
+			}
+			e.Consumed()
 		}
 	}(ch)
 
