@@ -9,6 +9,7 @@ import (
 type Fields map[string]interface{}
 
 type Entry struct {
+	sync.RWMutex
 	wg        *sync.WaitGroup
 	logger    *logger
 	calldepth int

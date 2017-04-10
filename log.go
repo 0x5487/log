@@ -206,11 +206,13 @@ func (l *logger) handleEntry(e *Entry) {
 
 	channels, ok := l.channels[e.Level]
 	if ok {
+		e.Lock()
 		e.wg.Add(len(channels))
 		for _, ch := range channels {
 			ch <- e
 		}
 		e.wg.Wait()
+		e.Unlock()
 	}
 
 	l.entryPool.Put(e)
