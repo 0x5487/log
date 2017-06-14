@@ -215,5 +215,6 @@ func (l *logger) handleEntry(e *Entry) {
 		e.Unlock()
 	}
 
+	e.reset()
 	l.entryPool.Put(e)
 }

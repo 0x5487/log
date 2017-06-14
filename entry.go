@@ -127,3 +127,8 @@ func (e *Entry) Consumed() {
 		e.wg.Done()
 	}
 }
+
+func (e *Entry) reset() {
+	e.File = ""
+	e.Line = 0
+}
