@@ -212,7 +212,7 @@ func (l *logger) handleEntry(e *Entry) {
 			ch <- e
 		}
 		e.wg.Wait()
-		e.Unlock()
+		defer e.Unlock()
 	}
 
 	e.reset()
