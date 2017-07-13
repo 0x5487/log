@@ -23,11 +23,9 @@ func (c *Console) Run() chan<- *log.Entry {
 	go func(entries <-chan *log.Entry) {
 		var e *log.Entry
 		for e = range entries {
-			defer func() {
-				e.Consumed()
-			}()
 			msg := FormatFunc(e)
 			println(msg)
+			e.Consumed()
 		}
 	}(ch)
 
