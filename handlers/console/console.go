@@ -38,7 +38,15 @@ func FormatFunc(entry *log.Entry) string {
 
 	strFields := ""
 	for key, value := range entry.Fields {
-		strFields += fmt.Sprintf("%s=%#v ", key, value)
+
+		switch value.(type) {
+		case string:
+			strFields += value.(string)
+		default:
+			strFields += fmt.Sprintf("%#v ", value)
+		}
+
+		strFields += fmt.Sprintf("%s=%s ", key, value)
 	}
 
 	var result string
