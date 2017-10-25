@@ -114,14 +114,11 @@ func (e *Entry) Fatalf(msg string, v ...interface{}) {
 
 // WithFields adds the provided fieldsto the current entry
 func (e *Entry) WithFields(fields Fields) Logger {
-	if e.Fields == nil {
-		e.Fields = fields
-	} else {
-		for k, val := range fields {
-			e.Fields[k] = val
-		}
+	f := Fields{}
+	for k, val := range fields {
+		f[k] = val
 	}
-	return e
+	return e.logger.newEntry(InfoLevel, "", f, skipLevel)
 }
 
 // Consumed lets the Entry and subsequently the Logger

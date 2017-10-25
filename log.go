@@ -56,12 +56,12 @@ func new() *logger {
 		host:     hostname,
 		channels: make(LevelHandlerChannels),
 		callerInfoLevels: [6]bool{
-			true,
-			false,
-			false,
-			true,
-			true,
-			true,
+			true,  // debug
+			false, // info
+			false, // warn
+			true,  // error
+			true,  // panic
+			true,  // fatal
 		},
 	}
 
