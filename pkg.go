@@ -111,7 +111,7 @@ func StackTrace() Logger {
 	customFields := Fields{
 		"stack_trace": string(trace) + "\n",
 	}
-	return _logger.newEntry(DebugLevel, "", customFields, skipLevel)
+	return _logger.newEntry(ErrorLevel, "", customFields, skipLevel)
 }
 
 // SetAppID set a constant application key
