@@ -2,9 +2,14 @@ package console
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/jasonsoft/log"
+)
+
+const (
+	base10 = 10
 )
 
 // Console is an instance of the console logger
@@ -36,31 +41,53 @@ func FormatFunc(entry *log.Entry) string {
 	time := entry.Timestamp.Format("2006-01-02T15:04:05.999Z")
 	level := entry.Level.String()
 
-	strFields := ""
-	for key, value := range entry.Fields {
+	builder := strings.Builder{}
 
-		switch value.(type) {
-		case string:
-			strFields += value.(string)
-		default:
-			strFields += fmt.Sprintf("%#v ", value)
-		}
-
-		strFields += fmt.Sprintf("%s=%s ", key, value)
-	}
-
-	var result string
 	if entry.Line > 0 && len(entry.File) > 0 {
-		result = fmt.Sprintf("time=\"%s\" level=%s msg=\"%s\" line=\"%d\" file=\"%s\"  ", time, level, entry.Message, entry.Line, entry.File)
-
+		builder.WriteString(fmt.Sprintf("time=\"%s\" level=%s msg=\"%s\" line=\"%d\" file=\"%s\" ", time, level, entry.Message, entry.Line, entry.File))
 	} else {
-		result = fmt.Sprintf("time=\"%s\" level=%s msg=\"%s\" ", time, level, entry.Message)
-
+		builder.WriteString(fmt.Sprintf("time=\"%s\" level=%s msg=\"%s\" ", time, level, entry.Message))
 	}
 
-	if len(strFields) > 0 {
-		result += strings.TrimSpace(strFields)
+	// custom fields to string
+	var b []byte
+	for key, value := range entry.Fields {
+		b = append(b, key...)
+		b = append(b, "="...)
+		switch t := value.(type) {
+		case string:
+			b = append(b, t...)
+		case int:
+			b = strconv.AppendInt(b, int64(t), base10)
+		case int8:
+			b = strconv.AppendInt(b, int64(t), base10)
+		case int16:
+			b = strconv.AppendInt(b, int64(t), base10)
+		case int32:
+			b = strconv.AppendInt(b, int64(t), base10)
+		case int64:
+			b = strconv.AppendInt(b, t, base10)
+		case uint:
+			b = strconv.AppendUint(b, uint64(t), base10)
+		case uint8:
+			b = strconv.AppendUint(b, uint64(t), base10)
+		case uint16:
+			b = strconv.AppendUint(b, uint64(t), base10)
+		case uint32:
+			b = strconv.AppendUint(b, uint64(t), base10)
+		case uint64:
+			b = strconv.AppendUint(b, t, base10)
+		case float32:
+			b = strconv.AppendFloat(b, float64(t), 'f', -1, 32)
+		case float64:
+			b = strconv.AppendFloat(b, t, 'f', -1, 64)
+		case bool:
+			b = strconv.AppendBool(b, t)
+		default:
+			b = append(b, fmt.Sprintf("%#v", value)...)
+		}
+		builder.Write(b)
 	}
 
-	return result
+	return builder.String()
 }
