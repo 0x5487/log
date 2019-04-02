@@ -85,7 +85,6 @@ func (l *logger) newEntry(level Level, message string, fields Fields, calldepth 
 	entry.Level = level
 	entry.Message = strings.TrimSpace(message)
 	entry.Fields = fields
-	entry.Timestamp = time.Now().UTC()
 	return entry
 }
 
@@ -204,6 +203,7 @@ func (l *logger) handleEntry(e *Entry) {
 		_, e.File, e.Line, _ = runtime.Caller(e.calldepth)
 	}
 
+	e.Timestamp = time.Now().UTC()
 	channels, ok := l.channels[e.Level]
 	if ok {
 		e.Lock()
