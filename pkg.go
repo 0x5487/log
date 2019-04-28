@@ -6,123 +6,121 @@ import (
 	"runtime"
 )
 
-var (
-	_logger *logger
-)
+var entry = new()
 
-func init() {
-	_logger = new()
+// SetLogger replace default log
+// Example:
+//   log.SetLogger(log.WithFields(log.Fields{"location": os.Getenv("LOCATION")}))
+func SetLogger(e Logger) {
+	entry = e.(*Entry)
 }
 
 // RegisterHandler adds a new Log Handler and specifies what log levels
 // the handler will be passed log entries for
 func RegisterHandler(handler Handler, levels ...Level) {
-	_logger.RegisterHandler(handler, levels...)
+	entry.RegisterHandler(handler, levels...)
 }
 
 // Debug level formatted message.
 func Debug(v ...interface{}) {
-	e := _logger.newEntry(DebugLevel, fmt.Sprint(v...), nil, skipLevel)
-	_logger.handleEntry(e)
+	entry.handler(DebugLevel, fmt.Sprint(v...))
 }
 
 // Debugf level formatted message.
 func Debugf(msg string, v ...interface{}) {
-	e := _logger.newEntry(DebugLevel, fmt.Sprintf(msg, v...), nil, skipLevel)
-	_logger.handleEntry(e)
+	entry.handler(DebugLevel, fmt.Sprintf(msg, v...))
+}
+
+// Println Info level message.
+func Println(v ...interface{}) {
+	entry.handler(InfoLevel, fmt.Sprint(v...))
+}
+
+// Print Info level message.
+func Print(v ...interface{}) {
+	entry.handler(InfoLevel, fmt.Sprint(v...))
 }
 
 // Info level formatted message.
 func Info(v ...interface{}) {
-	e := _logger.newEntry(InfoLevel, fmt.Sprint(v...), nil, skipLevel)
-	_logger.handleEntry(e)
+	entry.handler(InfoLevel, fmt.Sprint(v...))
 }
 
 // Infof level formatted message.
 func Infof(msg string, v ...interface{}) {
-	e := _logger.newEntry(InfoLevel, fmt.Sprintf(msg, v...), nil, skipLevel)
-	_logger.handleEntry(e)
+	entry.handler(InfoLevel, fmt.Sprintf(msg, v...))
 }
 
 // Warn level formatted message.
 func Warn(v ...interface{}) {
-	e := _logger.newEntry(WarnLevel, fmt.Sprint(v...), nil, skipLevel)
-	_logger.handleEntry(e)
+	entry.handler(WarnLevel, fmt.Sprint(v...))
 }
 
 // Warnf level formatted message.
 func Warnf(msg string, v ...interface{}) {
-	e := _logger.newEntry(WarnLevel, fmt.Sprintf(msg, v...), nil, skipLevel)
-	_logger.handleEntry(e)
+	entry.handler(WarnLevel, fmt.Sprintf(msg, v...))
 }
 
 // Error level formatted message
 func Error(v ...interface{}) {
-	e := _logger.newEntry(ErrorLevel, fmt.Sprint(v...), nil, skipLevel)
-	_logger.handleEntry(e)
+	entry.handler(ErrorLevel, fmt.Sprint(v...))
 }
 
 // Errorf level formatted message
 func Errorf(msg string, v ...interface{}) {
-	e := _logger.newEntry(ErrorLevel, fmt.Sprintf(msg, v...), nil, skipLevel)
-	_logger.handleEntry(e)
+	entry.handler(ErrorLevel, fmt.Sprintf(msg, v...))
 }
 
 // Panic level formatted message
 func Panic(v ...interface{}) {
 	s := fmt.Sprint(v...)
-	e := _logger.newEntry(PanicLevel, s, nil, skipLevel)
-	_logger.handleEntry(e)
+	entry.handler(PanicLevel, s)
 	panic(s)
 }
 
 // Panicf level formatted message
 func Panicf(msg string, v ...interface{}) {
 	s := fmt.Sprintf(msg, v...)
-	e := _logger.newEntry(PanicLevel, s, nil, skipLevel)
-	_logger.handleEntry(e)
+	entry.handler(PanicLevel, s)
 	panic(s)
 }
 
 // Fatal level formatted message, followed by an exit.
 func Fatal(v ...interface{}) {
-	e := _logger.newEntry(FatalLevel, fmt.Sprint(v...), nil, skipLevel)
-	_logger.handleEntry(e)
+	entry.handler(FatalLevel, fmt.Sprint(v...))
 	exitFunc(1)
 }
 
 // Fatalf level formatted message, followed by an exit.
 func Fatalf(msg string, v ...interface{}) {
-	e := _logger.newEntry(FatalLevel, fmt.Sprintf(msg, v...), nil, skipLevel)
-	_logger.handleEntry(e)
+	entry.handler(FatalLevel, fmt.Sprintf(msg, v...))
 	exitFunc(1)
 }
 
 // WithFields returns a log Entry with fields set
 func WithFields(fields Fields) Logger {
-	e := _logger.newEntry(InfoLevel, "", fields, skipLevel)
-	return e
+	return entry.WithFields(fields)
 }
 
 // StackTrace creates a new log Entry with pre-populated field with stack trace.
-func StackTrace() Logger {
+func StackTrace() *Entry {
 	trace := make([]byte, 4096)
 	runtime.Stack(trace, true)
 	customFields := Fields{
 		"stack_trace": string(trace) + "\n",
 	}
-	return _logger.newEntry(ErrorLevel, "", customFields, skipLevel)
+	return entry.logger.newEntry(ErrorLevel, "", customFields, entryCalldepth)
 }
 
 // SetAppID set a constant application key
 // that will be set on all log Entry objects
 func SetAppID(id string) {
-	_logger.appID = id
+	entry.logger.appID = id
 }
 
 // AppID return an application key
 func AppID() string {
-	return _logger.appID
+	return entry.logger.appID
 }
 
 const (
@@ -140,5 +138,5 @@ func FromContext(ctx context.Context) Logger {
 	if ok {
 		return val
 	}
-	return _logger
+	return entry
 }
