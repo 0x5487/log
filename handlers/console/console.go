@@ -44,9 +44,9 @@ func FormatFunc(entry *log.Entry) string {
 	builder := strings.Builder{}
 
 	if entry.Line > 0 && len(entry.File) > 0 {
-		builder.WriteString(fmt.Sprintf("time=\"%s\" level=%s msg=\"%s\" line=\"%d\" file=\"%s\" ", time, level, entry.Message, entry.Line, entry.File))
+		_, _ = builder.WriteString(fmt.Sprintf("time=\"%s\" level=%s msg=\"%s\" line=\"%d\" file=\"%s\" ", time, level, entry.Message, entry.Line, entry.File))
 	} else {
-		builder.WriteString(fmt.Sprintf("time=\"%s\" level=%s msg=\"%s\" ", time, level, entry.Message))
+		_, _ = builder.WriteString(fmt.Sprintf("time=\"%s\" level=%s msg=\"%s\" ", time, level, entry.Message))
 	}
 
 	// custom fields to string
@@ -86,7 +86,7 @@ func FormatFunc(entry *log.Entry) string {
 		default:
 			b = append(b, fmt.Sprintf("%#v", value)...)
 		}
-		builder.Write(b)
+		_, _ = builder.Write(b)
 	}
 
 	return builder.String()

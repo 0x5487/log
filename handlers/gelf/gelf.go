@@ -41,7 +41,7 @@ func (g *Gelf) Run() chan<- *log.Entry {
 				_, err := g.conn.Write(payload)
 				if err != nil {
 					println("failed to write: %v", err)
-					g.conn.Close()
+					_ = g.conn.Close()
 					g.conn = nil
 				} else {
 					//msg := fmt.Sprintf("payload size: %d", size)
