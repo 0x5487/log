@@ -16,43 +16,35 @@ type Gelf struct {
 	url  *url.URL
 }
 
+// New create a new Gelf instance
 func New(connectionString string) *Gelf {
 	url, err := url.Parse(connectionString)
 	if err != nil {
 		panic(err)
 	}
-	return &Gelf{
+	g := &Gelf{
 		url: url,
 	}
+	g.manageConnections()
+	return g
 }
 
-// Run starts the logger consuming on the returned channed
-func (g *Gelf) Run() chan<- *log.Entry {
-	// in a big high traffic app, set a higher buffer
-	ch := make(chan *log.Entry, 30000)
-	g.manageConnections()
-	go func(entries <-chan *log.Entry) {
-		var empty byte
-		var e *log.Entry
-		for e = range entries {
-			if g.conn != nil {
-				payload := entryToPayload(e)
-				payload = append(payload, empty) // when we use tcp, we need to add null byte in the end.
-				_, err := g.conn.Write(payload)
-				if err != nil {
-					println("failed to write: %v", err)
-					_ = g.conn.Close()
-					g.conn = nil
-				} else {
-					//msg := fmt.Sprintf("payload size: %d", size)
-					//println(msg)
-				}
-			}
-			e.Consumed()
+// Log handles the log entry
+func (g *Gelf) Log(e log.Entry) {
+	var empty byte
+	if g.conn != nil {
+		payload := entryToPayload(e)
+		payload = append(payload, empty) // when we use tcp, we need to add null byte in the end.
+		_, err := g.conn.Write(payload)
+		if err != nil {
+			println("failed to write: %v", err)
+			_ = g.conn.Close()
+			g.conn = nil
+		} else {
+			//msg := fmt.Sprintf("payload size: %d", size)
+			//println(msg)
 		}
-	}(ch)
-
-	return ch
+	}
 }
 
 func (g *Gelf) manageConnections() {
@@ -85,7 +77,7 @@ func (g *Gelf) manageConnections() {
 	}()
 }
 
-func entryToPayload(e *log.Entry) []byte {
+func entryToPayload(e log.Entry) []byte {
 	items := make(map[string]interface{})
 	items["version"] = "1.1"
 	items["host"] = e.Host
@@ -94,18 +86,13 @@ func entryToPayload(e *log.Entry) []byte {
 	items["full_message"] = e.Message
 	items["timestamp"] = float64(e.Timestamp.UnixNano()) / float64(time.Second)
 	items["_app_id"] = e.AppID
-	items["_file"] = e.File
 
-	if e.Line > 0 {
-		items["_line"] = e.Line
-	}
-
-	for k, v := range e.Fields {
-		switch k {
+	for key, value := range e.Fields {
+		switch key {
 		case "short_message":
-			items[k] = v
+			items[key] = value
 		default:
-			items["_"+k] = v
+			items["_"+key] = value
 		}
 	}
 

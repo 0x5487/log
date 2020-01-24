@@ -45,5 +45,8 @@ func main() {
 }
 ```
 
-## Credits
-* Tim Ling
+## How to run benchmark
+```
+go test --bench=. -benchmem=true
+```
+

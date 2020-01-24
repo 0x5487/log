@@ -2,155 +2,159 @@ package log
 
 import (
 	"fmt"
-	"runtime"
 	"time"
 )
 
-const entryCalldepth = 2
-
 type Fields map[string]interface{}
 
+// Entry defines a single log entry
 type Entry struct {
-	logger    *logger
-	calldepth int
+	logger *logger
 
 	AppID     string    `json:"app_id"`
 	Host      string    `json:"host"`
 	Level     Level     `json:"level"`
 	Message   string    `json:"message"`
-	File      string    `json:"file"`
-	Line      int       `json:"line"`
 	Timestamp time.Time `json:"timestamp"`
 	Fields    Fields    `json:"fields"`
 }
 
-// RegisterHandler adds a new Log Handler and specifies what log levels
-// the handler will be passed log entries for
-func (e *Entry) RegisterHandler(handler Handler, levels ...Level) {
-	ch := handler.Run()
-
-	for _, level := range levels {
-		channels, ok := e.logger.channels[level]
-		if !ok {
-			channels = make(HandlerChannels, 0)
-		}
-
-		e.logger.channels[level] = append(channels, ch)
-	}
+func newEntry(l *logger) Entry {
+	e := Entry{}
+	e.logger = l
+	e.Host = l.host
+	e.AppID = l.appID
+	e.Fields = l.defaultFields
+	return e
 }
 
 // Debug level message.
-func (e *Entry) Debug(v ...interface{}) {
-	e.handler(DebugLevel, fmt.Sprint(v...))
+func (e Entry) Debug(v ...interface{}) {
+	e.Level = DebugLevel
+	e.Message = fmt.Sprint(v...)
+	handler(e)
 }
 
 // Debugf level message.
-func (e *Entry) Debugf(msg string, v ...interface{}) {
-	e.handler(DebugLevel, fmt.Sprintf(msg, v...))
+func (e Entry) Debugf(msg string, v ...interface{}) {
+	e.Level = DebugLevel
+	e.Message = fmt.Sprintf(msg, v...)
+	handler(e)
 }
 
 // Println Info level message.
-func (e *Entry) Println(v ...interface{}) {
-	e.handler(InfoLevel, fmt.Sprint(v...))
+func (e Entry) Println(v ...interface{}) {
+	e.Level = InfoLevel
+	e.Message = fmt.Sprint(v...)
+	handler(e)
 }
 
 // Print Info level message.
-func (e *Entry) Print(v ...interface{}) {
-	e.handler(InfoLevel, fmt.Sprint(v...))
+func (e Entry) Print(v ...interface{}) {
+	e.Level = InfoLevel
+	e.Message = fmt.Sprint(v...)
+	handler(e)
 }
 
 // Info level message.
-func (e *Entry) Info(v ...interface{}) {
-	e.handler(InfoLevel, fmt.Sprint(v...))
+func (e Entry) Info(v ...interface{}) {
+	e.Level = InfoLevel
+	e.Message = fmt.Sprint(v...)
+	handler(e)
 }
 
 // Infof level message.
-func (e *Entry) Infof(msg string, v ...interface{}) {
-	e.handler(InfoLevel, fmt.Sprintf(msg, v...))
+func (e Entry) Infof(msg string, v ...interface{}) {
+	e.Level = InfoLevel
+	e.Message = fmt.Sprintf(msg, v...)
+	handler(e)
 }
 
 // Warn level message.
-func (e *Entry) Warn(v ...interface{}) {
-	e.handler(WarnLevel, fmt.Sprint(v...))
+func (e Entry) Warn(v ...interface{}) {
+	e.Level = WarnLevel
+	e.Message = fmt.Sprint(v...)
+	handler(e)
 }
 
 // Warnf level message.
-func (e *Entry) Warnf(msg string, v ...interface{}) {
-	e.handler(WarnLevel, fmt.Sprintf(msg, v...))
+func (e Entry) Warnf(msg string, v ...interface{}) {
+	e.Level = WarnLevel
+	e.Message = fmt.Sprintf(msg, v...)
+	handler(e)
 }
 
 // Error level message.
-func (e *Entry) Error(v ...interface{}) {
-	e.handler(ErrorLevel, fmt.Sprint(v...))
+func (e Entry) Error(v ...interface{}) {
+	e.Level = ErrorLevel
+	e.Message = fmt.Sprint(v...)
+	handler(e)
 }
 
 // Errorf level message.
-func (e *Entry) Errorf(msg string, v ...interface{}) {
-	e.handler(ErrorLevel, fmt.Sprintf(msg, v...))
+func (e Entry) Errorf(msg string, v ...interface{}) {
+	e.Level = ErrorLevel
+	e.Message = fmt.Sprintf(msg, v...)
+	handler(e)
 }
 
 // Panic level message.
-func (e *Entry) Panic(v ...interface{}) {
-	e.handler(PanicLevel, fmt.Sprint(v...))
-	panic(e.Message)
+func (e Entry) Panic(v ...interface{}) {
+	e.Level = PanicLevel
+	e.Message = fmt.Sprint(v...)
+	handler(e)
+	exitFunc(1)
 }
 
 // Panicf level message.
-func (e *Entry) Panicf(msg string, v ...interface{}) {
-	e.handler(PanicLevel, fmt.Sprintf(msg, v...))
-	panic(e.Message)
+func (e Entry) Panicf(msg string, v ...interface{}) {
+	e.Level = PanicLevel
+	e.Message = fmt.Sprintf(msg, v...)
+	handler(e)
+	exitFunc(1)
 }
 
 // Fatal level message.
-func (e *Entry) Fatal(v ...interface{}) {
-	e.handler(FatalLevel, fmt.Sprint(v...))
+func (e Entry) Fatal(v ...interface{}) {
+	e.Level = FatalLevel
+	e.Message = fmt.Sprint(v...)
+	handler(e)
 	exitFunc(1)
 }
 
 // Fatalf level message.
-func (e *Entry) Fatalf(msg string, v ...interface{}) {
-	e.handler(FatalLevel, fmt.Sprintf(msg, v...))
+func (e Entry) Fatalf(msg string, v ...interface{}) {
+	e.Level = FatalLevel
+	e.Message = fmt.Sprintf(msg, v...)
+	handler(e)
 	exitFunc(1)
 }
 
-// WithFields adds the provided fieldsto the current entry
-func (e *Entry) WithFields(fields Fields) Logger {
-	data := Fields{}
+// WithFields adds the provided fields to the current entry
+func (e Entry) WithFields(fields Fields) Entry {
+	newFields := Fields{}
 	if e.Fields != nil {
 		for k, val := range e.Fields {
-			data[k] = val
+			newFields[k] = val
 		}
 	}
 	if fields != nil {
 		for k, val := range fields {
-			data[k] = val
+			newFields[k] = val
 		}
 	}
-	return e.logger.newEntry(InfoLevel, "", data, entryCalldepth)
+
+	e.Fields = newFields
+	return e
 }
 
-// Consumed lets the Entry and subsequently the Logger
-// instance know that it has been used by a handler
-func (e *Entry) Consumed() {
-	e.logger.entryPool.Put(e)
-}
+func handler(e Entry) {
+	e.Timestamp = time.Now().UTC()
 
-func (e *Entry) handler(lv Level, msg string) {
-	file := ""
-	line := 0
-	now := time.Now().UTC()
-	if e.logger.callerInfoLevels[lv] {
-		_, file, line, _ = runtime.Caller(e.calldepth)
-	}
-	channels, ok := e.logger.channels[lv]
-	if ok {
-		for _, ch := range channels {
-			// new entry here, to prevent race condition
-			entry := e.logger.newEntry(lv, msg, e.Fields, entryCalldepth)
-			entry.File = file
-			entry.Line = line
-			entry.Timestamp = now
-			ch <- entry
-		}
+	e.logger.rw.RLock()
+	defer e.logger.rw.RUnlock()
+
+	for _, h := range e.logger.handlers[e.Level] {
+		h.Log(e)
 	}
 }
