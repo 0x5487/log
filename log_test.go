@@ -101,6 +101,33 @@ func TestTrace(t *testing.T) {
 	}
 }
 
+func TestWithDefaultFields(t *testing.T) {
+	h := memory.New()
+	log.RegisterHandler(h, log.AllLevels...)
+
+	log.WithDefaultFields(log.Fields{
+		"app_id": "santa",
+		"env":    "dev",
+	})
+	log.Info("upload complete")
+
+	logger := log.WithFields(log.Fields{"file": "sloth.png"})
+	logger.Debugf("debug test")
+
+	assert.Equal(t, 2, len(h.Entries))
+
+	e := h.Entries[0]
+	assert.Equal(t, "upload complete", e.Message)
+	assert.Equal(t, log.InfoLevel, e.Level)
+	assert.Equal(t, e.Fields, log.Fields{"app_id": "santa", "env": "dev"})
+
+	e = h.Entries[1]
+	assert.Equal(t, "debug test", e.Message)
+	assert.Equal(t, log.DebugLevel, e.Level)
+	assert.Equal(t, e.Fields, log.Fields{"app_id": "santa", "env": "dev", "file": "sloth.png"})
+
+}
+
 func BenchmarkSmall(b *testing.B) {
 	h := discard.New()
 	log.RegisterHandler(h, log.InfoLevel)
