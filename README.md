@@ -43,6 +43,16 @@ func main() {
 
 ## How to run benchmark
 ```
-go test --bench=. -benchmem
+go test -bench=. -benchmem -run=^bb -v
+```
+```
+goos: windows
+goarch: amd64
+pkg: github.com/jasonsoft/log
+BenchmarkSmall-12       13276719                95.4 ns/op             0 B/op          0 allocs/op
+BenchmarkMedium-12       1000000              1001 ns/op             336 B/op          2 allocs/op
+BenchmarkLarge-12         203383              5320 ns/op            2183 B/op          9 allocs/op
+PASS
+ok      github.com/jasonsoft/log        4.399s
 ```
 
