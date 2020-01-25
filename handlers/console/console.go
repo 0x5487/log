@@ -9,7 +9,10 @@ import (
 )
 
 const (
-	base10 = 10
+	base10  = 10
+	space   = byte(' ')
+	equals  = byte('=')
+	newLine = byte('\n')
 )
 
 // Console is an instance of the console logger
@@ -39,7 +42,7 @@ func formatFunc(entry log.Entry) string {
 	var b []byte
 	for key, value := range entry.Fields {
 		b = append(b, key...)
-		b = append(b, "="...)
+		b = append(b, equals)
 		switch t := value.(type) {
 		case string:
 			b = append(b, t...)
@@ -72,6 +75,7 @@ func formatFunc(entry log.Entry) string {
 		default:
 			b = append(b, fmt.Sprintf("%#v", value)...)
 		}
+		b = append(b, space)
 		_, _ = builder.Write(b)
 	}
 
