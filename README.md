@@ -13,11 +13,8 @@ It is a simple log library for golang.  Golang standard context is Supported.
 package main
 
 import (
-	"time"
-
 	"github.com/jasonsoft/log"
 	"github.com/jasonsoft/log/handlers/console"
-	"github.com/jasonsoft/log/handlers/gelf"
 )
 
 func main() {
@@ -26,8 +23,12 @@ func main() {
 	clog := console.New()
 	log.RegisterHandler(clog, log.AllLevels...)
 
-    defer log.Trace("time to run").Stop()
-	for i := 0; i < 1000; i++ {
+	// send log to graylog server
+	// graylog := gelf.New("tcp://192.168.1.1:12201")
+	// log.RegisterHandler(graylog, log.AllLevels...)
+
+	defer log.Trace("time to run").Stop()
+	for i := 0; i < 2; i++ {
 		log.Debug("hello world")
 		customFields := log.Fields{
 			"city":    "keelung",

@@ -16,7 +16,7 @@ func main() {
 	// log.RegisterHandler(graylog, log.AllLevels...)
 
 	defer log.Trace("time to run").Stop()
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 2; i++ {
 		log.Debug("hello world")
 		customFields := log.Fields{
 			"city":    "keelung",

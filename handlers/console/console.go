@@ -27,7 +27,7 @@ func New() *Console {
 // Log handles the log entry
 func (c *Console) Log(e log.Entry) {
 	msg := formatFunc(e)
-	println(msg)
+	fmt.Println(msg)
 }
 
 func formatFunc(entry log.Entry) string {
@@ -43,6 +43,7 @@ func formatFunc(entry log.Entry) string {
 	for key, value := range entry.Fields {
 		b = append(b, key...)
 		b = append(b, equals)
+
 		switch t := value.(type) {
 		case string:
 			b = append(b, t...)
@@ -75,9 +76,9 @@ func formatFunc(entry log.Entry) string {
 		default:
 			b = append(b, fmt.Sprintf("%#v", value)...)
 		}
-		b = append(b, space)
-		_, _ = builder.Write(b)
-	}
 
+		b = append(b, space)
+	}
+	_, _ = builder.Write(b)
 	return builder.String()
 }
