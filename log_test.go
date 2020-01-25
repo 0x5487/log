@@ -38,11 +38,21 @@ func TestLevels(t *testing.T) {
 }
 
 func TestContext(t *testing.T) {
+	h := memory.New()
+	log.RegisterHandler(h, log.AllLevels...)
+
 	ctx := context.Background()
 	ctx = log.NewContext(ctx, log.WithFields(log.Fields{"request_id": 123}))
 
 	logger := log.FromContext(ctx)
 	logger.Info("request test")
+
+	assert.Equal(t, 1, len(h.Entries))
+
+	e := h.Entries[0]
+	assert.Equal(t, "request test", e.Message)
+	assert.Equal(t, log.InfoLevel, e.Level)
+	assert.Equal(t, log.Fields{"request_id": 123}, e.Fields)
 }
 
 func TestWithFields(t *testing.T) {
