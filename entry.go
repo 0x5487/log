@@ -2,14 +2,17 @@ package log
 
 import (
 	"fmt"
+	"os"
 	"time"
 )
 
+// Fields represents a map of entry level data used for structured logging.
 type Fields map[string]interface{}
 
 // Entry defines a single log entry
 type Entry struct {
 	logger *logger
+	start  time.Time
 
 	AppID     string    `json:"app_id"`
 	Host      string    `json:"host"`
@@ -29,9 +32,9 @@ func newEntry(l *logger) Entry {
 }
 
 // Debug level message.
-func (e Entry) Debug(v ...interface{}) {
+func (e Entry) Debug(msg string) {
 	e.Level = DebugLevel
-	e.Message = fmt.Sprint(v...)
+	e.Message = msg
 	handler(e)
 }
 
@@ -43,23 +46,23 @@ func (e Entry) Debugf(msg string, v ...interface{}) {
 }
 
 // Println Info level message.
-func (e Entry) Println(v ...interface{}) {
+func (e Entry) Println(msg string) {
 	e.Level = InfoLevel
-	e.Message = fmt.Sprint(v...)
+	e.Message = msg
 	handler(e)
 }
 
 // Print Info level message.
-func (e Entry) Print(v ...interface{}) {
+func (e Entry) Print(msg string) {
 	e.Level = InfoLevel
-	e.Message = fmt.Sprint(v...)
+	e.Message = msg
 	handler(e)
 }
 
 // Info level message.
-func (e Entry) Info(v ...interface{}) {
+func (e Entry) Info(msg string) {
 	e.Level = InfoLevel
-	e.Message = fmt.Sprint(v...)
+	e.Message = msg
 	handler(e)
 }
 
@@ -71,9 +74,9 @@ func (e Entry) Infof(msg string, v ...interface{}) {
 }
 
 // Warn level message.
-func (e Entry) Warn(v ...interface{}) {
+func (e Entry) Warn(msg string) {
 	e.Level = WarnLevel
-	e.Message = fmt.Sprint(v...)
+	e.Message = msg
 	handler(e)
 }
 
@@ -85,9 +88,9 @@ func (e Entry) Warnf(msg string, v ...interface{}) {
 }
 
 // Error level message.
-func (e Entry) Error(v ...interface{}) {
+func (e Entry) Error(msg string) {
 	e.Level = ErrorLevel
-	e.Message = fmt.Sprint(v...)
+	e.Message = msg
 	handler(e)
 }
 
@@ -99,11 +102,11 @@ func (e Entry) Errorf(msg string, v ...interface{}) {
 }
 
 // Panic level message.
-func (e Entry) Panic(v ...interface{}) {
+func (e Entry) Panic(msg string) {
 	e.Level = PanicLevel
-	e.Message = fmt.Sprint(v...)
+	e.Message = msg
 	handler(e)
-	exitFunc(1)
+	os.Exit(1)
 }
 
 // Panicf level message.
@@ -111,15 +114,15 @@ func (e Entry) Panicf(msg string, v ...interface{}) {
 	e.Level = PanicLevel
 	e.Message = fmt.Sprintf(msg, v...)
 	handler(e)
-	exitFunc(1)
+	os.Exit(1)
 }
 
 // Fatal level message.
-func (e Entry) Fatal(v ...interface{}) {
+func (e Entry) Fatal(msg string) {
 	e.Level = FatalLevel
-	e.Message = fmt.Sprint(v...)
+	e.Message = msg
 	handler(e)
-	exitFunc(1)
+	os.Exit(1)
 }
 
 // Fatalf level message.
@@ -127,7 +130,12 @@ func (e Entry) Fatalf(msg string, v ...interface{}) {
 	e.Level = FatalLevel
 	e.Message = fmt.Sprintf(msg, v...)
 	handler(e)
-	exitFunc(1)
+	os.Exit(1)
+}
+
+// WithField returns a new entry with the `key` and `value` set.
+func (e Entry) WithField(key string, value interface{}) Entry {
+	return e.WithFields(Fields{key: value})
 }
 
 // WithFields adds the provided fields to the current entry
@@ -146,6 +154,25 @@ func (e Entry) WithFields(fields Fields) Entry {
 
 	e.Fields = newFields
 	return e
+}
+
+// WithError returns a new entry with the "error" set to `err`.
+func (e Entry) WithError(err error) Entry {
+	return e.WithField("error", err.Error())
+}
+
+// Trace returns a new entry with a Stop method to fire off
+// a corresponding completion log, useful with defer.
+func (e Entry) Trace(msg string) Entry {
+	e.Message = msg
+	e.start = time.Now().UTC()
+	return e
+}
+
+// Stop should be used with Trace, to fire off the completion message. When
+// an `err` is passed the "error" field is set, and the log level is error.
+func (e Entry) Stop() {
+	e.WithField("duration", time.Since(e.start)).Info(e.Message)
 }
 
 func handler(e Entry) {

@@ -8,8 +8,7 @@ import (
 
 // Logger is the default instance of the log package
 var (
-	exitFunc = os.Exit
-	_logger  = new()
+	_logger = new()
 )
 
 // Handler is an interface that log handlers need to be implemented
@@ -48,9 +47,9 @@ func RegisterHandler(handler Handler, levels ...Level) {
 }
 
 // Debug level formatted message.
-func Debug(v ...interface{}) {
+func Debug(msg string) {
 	e := newEntry(_logger)
-	e.Debug(v...)
+	e.Debug(msg)
 }
 
 // Debugf level formatted message.
@@ -60,21 +59,21 @@ func Debugf(msg string, v ...interface{}) {
 }
 
 // Println Info level message.
-func Println(v ...interface{}) {
+func Println(msg string) {
 	e := newEntry(_logger)
-	e.Println(v...)
+	e.Println(msg)
 }
 
 // Print Info level message.
-func Print(v ...interface{}) {
+func Print(msg string) {
 	e := newEntry(_logger)
-	e.Print(v...)
+	e.Print(msg)
 }
 
 // Info level formatted message.
-func Info(v ...interface{}) {
+func Info(msg string) {
 	e := newEntry(_logger)
-	e.Info(v...)
+	e.Info(msg)
 }
 
 // Infof level formatted message.
@@ -84,9 +83,9 @@ func Infof(msg string, v ...interface{}) {
 }
 
 // Warn level formatted message.
-func Warn(v ...interface{}) {
+func Warn(msg string) {
 	e := newEntry(_logger)
-	e.Warn(v...)
+	e.Warn(msg)
 }
 
 // Warnf level formatted message.
@@ -96,9 +95,9 @@ func Warnf(msg string, v ...interface{}) {
 }
 
 // Error level formatted message
-func Error(v ...interface{}) {
+func Error(msg string) {
 	e := newEntry(_logger)
-	e.Error(v...)
+	e.Error(msg)
 }
 
 // Errorf level formatted message
@@ -108,9 +107,9 @@ func Errorf(msg string, v ...interface{}) {
 }
 
 // Panic level formatted message
-func Panic(v ...interface{}) {
+func Panic(msg string) {
 	e := newEntry(_logger)
-	e.Panic(v...)
+	e.Panic(msg)
 }
 
 // Panicf level formatted message
@@ -120,9 +119,9 @@ func Panicf(msg string, v ...interface{}) {
 }
 
 // Fatal level formatted message, followed by an exit.
-func Fatal(v ...interface{}) {
+func Fatal(msg string) {
 	e := newEntry(_logger)
-	e.Fatal(v...)
+	e.Fatal(msg)
 }
 
 // Fatalf level formatted message, followed by an exit.
@@ -135,6 +134,12 @@ func Fatalf(msg string, v ...interface{}) {
 func WithFields(fields Fields) Entry {
 	e := newEntry(_logger)
 	return e.WithFields(fields)
+}
+
+// WithField returns a new entry with the `key` and `value` set.
+func WithField(key string, value interface{}) Entry {
+	e := newEntry(_logger)
+	return e.WithField(key, value)
 }
 
 // WithDefaultFields adds fields to every entry instance
@@ -154,6 +159,19 @@ func WithDefaultFields(fields Fields) {
 	}
 
 	_logger.defaultFields = newFields
+}
+
+// WithError returns a new entry with the "error" set to `err`.
+func WithError(err error) Entry {
+	e := newEntry(_logger)
+	return e.WithError((err))
+}
+
+// Trace returns a new entry with a Stop method to fire off
+// a corresponding completion log, useful with defer.
+func Trace(msg string) Entry {
+	e := newEntry(_logger)
+	return e.Trace(msg)
 }
 
 // SetAppID set a constant application key

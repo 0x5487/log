@@ -47,6 +47,6 @@ func main() {
 
 ## How to run benchmark
 ```
-go test --bench=. -benchmem=true
+go test --bench=. -benchmem
 ```
 
