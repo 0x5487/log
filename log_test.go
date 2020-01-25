@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"testing"
-	"time"
 
 	"github.com/jasonsoft/log"
 	"github.com/jasonsoft/log/handlers/discard"
@@ -98,7 +97,7 @@ func TestTrace(t *testing.T) {
 		assert.Equal(t, "upload", e.Message)
 		assert.Equal(t, log.InfoLevel, e.Level)
 		assert.Equal(t, e.Fields["file"], "sloth.png")
-		assert.IsType(t, e.Fields["duration"], time.Duration(0))
+		assert.IsType(t, e.Fields["duration"], "0")
 	}
 }
 
