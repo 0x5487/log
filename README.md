@@ -40,7 +40,16 @@ func main() {
 	}
 }
 ```
-
+Output
+```
+time="2020-01-25T08:58:12.642Z" level=DEBUG msg="hello world"
+time="2020-01-25T08:58:12.642Z" level=INFO msg="more info" city=keelung country=taiwan
+time="2020-01-25T08:58:12.643Z" level=ERROR msg="oops..."
+time="2020-01-25T08:58:12.643Z" level=DEBUG msg="hello world"
+time="2020-01-25T08:58:12.643Z" level=INFO msg="more info" country=taiwan city=keelung
+time="2020-01-25T08:58:12.644Z" level=ERROR msg="oops..."
+time="2020-01-25T08:58:12.644Z" level=INFO msg="time to run" duration=2.0074ms
+```
 ## How to run benchmark
 ```
 go test -bench=. -benchmem -run=^bb -v
