@@ -156,7 +156,7 @@ func (e Entry) WithFields(fields Fields) Entry {
 
 // WithError returns a new entry with the "error" set to `err`.
 func (e Entry) WithError(err error) Entry {
-	return e.WithField("error", err.Error())
+	return e.WithField("error", fmt.Sprintf("%+v", err))
 }
 
 // Trace returns a new entry with a Stop method to fire off

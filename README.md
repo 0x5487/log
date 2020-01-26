@@ -54,16 +54,17 @@ time="2020-01-26T03:48:58.359Z" level=ERROR msg="oops..." error=something bad ha
 time="2020-01-26T03:48:58.36Z" level=INFO msg="time to run" duration=983.1µs
 ```
 ## Benchmarks
+Run on Macbook Pro 15-inch 2018 using go version go1.13.5 windows 10 os
 
 ```shell
 go test -bench=. -benchmem -run=^bb -v
 goos: windows
 goarch: amd64
 pkg: github.com/jasonsoft/log
-BenchmarkSmall-12       13276719                95.4 ns/op             0 B/op          0 allocs/op
-BenchmarkMedium-12       1000000              1001 ns/op             336 B/op          2 allocs/op
-BenchmarkLarge-12         203383              5320 ns/op            2183 B/op          9 allocs/op
+BenchmarkSmall-12       13483690                82.6 ns/op             0 B/op          0 allocs/op
+BenchmarkMedium-12       2489635               605 ns/op             336 B/op          2 allocs/op
+BenchmarkLarge-12         479955              2802 ns/op            2183 B/op          9 allocs/op
 PASS
-ok      github.com/jasonsoft/log        4.399s
+ok      github.com/jasonsoft/log        4.604s
 ```
 
