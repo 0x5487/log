@@ -1,29 +1,26 @@
 package main
 
 import (
+	"errors"
+
 	"github.com/jasonsoft/log"
 	"github.com/jasonsoft/log/handlers/console"
 )
 
 func main() {
-	log.SetAppID("TesterApp") // unique id for the app
-
 	clog := console.New()
-	log.RegisterHandler(clog, log.AllLevels...)
+	log.RegisterHandler(clog, log.AllLevels...) // use console handler to log all level log
 
-	// send log to graylog server
-	// graylog := gelf.New("tcp://192.168.1.1:12201")
-	// log.RegisterHandler(graylog, log.AllLevels...)
+	defer log.Trace("time to run").Stop() // use trace to know how long it takes
 
-	defer log.Trace("time to run").Stop()
-	for i := 0; i < 2; i++ {
-		log.Debug("hello world")
-		customFields := log.Fields{
-			"city":    "keelung",
-			"country": "taiwan",
-		}
+	log.Debug("hello world")
 
-		log.WithFields(customFields).Info("more info")
-		log.Error("oops...")
+	fields := log.Fields{
+		"city":    "keelung",
+		"country": "taiwan",
 	}
+	log.WithFields(fields).Infof("more info") // log information with custom fileds
+
+	err := errors.New("something bad happened")
+	log.WithError(err).Error("oops...") // log error struct and print error message
 }

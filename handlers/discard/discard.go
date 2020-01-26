@@ -14,6 +14,6 @@ func New() *Handler {
 }
 
 // Log implements log.Handler.
-func (h *Handler) Log(e log.Entry) {
-
+func (h *Handler) Log(e log.Entry) error {
+	return nil
 }

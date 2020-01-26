@@ -1,7 +1,16 @@
 # log
-It is a simple log library for golang.  Golang standard context is Supported.
+It is a simple sturctured logging package  for Go.
 
-## Supported handlers
+## Features
+
+* easy and configurable
+* bulit-in some handlers
+* allow to add default fields to every log.  ( ex.  You maybe want to add `app_id` per each app or `env` per each environment)
+* trace duration
+* work with error interface 
+* golang standard context is supported
+
+## handlers
 * console
 * gelf (graylog)
 * memory (unit test purpose)
@@ -13,48 +22,41 @@ It is a simple log library for golang.  Golang standard context is Supported.
 package main
 
 import (
+	"errors"
+
 	"github.com/jasonsoft/log"
 	"github.com/jasonsoft/log/handlers/console"
 )
 
 func main() {
-	log.SetAppID("TesterApp") // unique id for the app
-
 	clog := console.New()
-	log.RegisterHandler(clog, log.AllLevels...)
+	log.RegisterHandler(clog, log.AllLevels...) // use console handler to log all level log
 
-	// send log to graylog server
-	// graylog := gelf.New("tcp://192.168.1.1:12201")
-	// log.RegisterHandler(graylog, log.AllLevels...)
+	defer log.Trace("time to run").Stop() // use trace to know how long it takes
 
-	defer log.Trace("time to run").Stop()
-	for i := 0; i < 2; i++ {
-		log.Debug("hello world")
-		customFields := log.Fields{
-			"city":    "keelung",
-			"country": "taiwan",
-		}
+	log.Debug("hello world")
 
-		log.WithFields(customFields).Info("more info")
-		log.Error("oops...")
+	fields := log.Fields{
+		"city":    "keelung",
+		"country": "taiwan",
 	}
+	log.WithFields(fields).Infof("more info") // log information with custom fileds
+
+	err := errors.New("something bad happened")
+	log.WithError(err).Error("oops...") // log error struct and print error message
 }
 ```
 Output
+```shell
+time="2020-01-26T03:48:58.359Z" level=DEBUG msg="hello world"
+time="2020-01-26T03:48:58.359Z" level=INFO msg="more info" city=keelung country=taiwan
+time="2020-01-26T03:48:58.359Z" level=ERROR msg="oops..." error=something bad happened
+time="2020-01-26T03:48:58.36Z" level=INFO msg="time to run" duration=983.1µs
 ```
-time="2020-01-25T08:58:12.642Z" level=DEBUG msg="hello world"
-time="2020-01-25T08:58:12.642Z" level=INFO msg="more info" city=keelung country=taiwan
-time="2020-01-25T08:58:12.643Z" level=ERROR msg="oops..."
-time="2020-01-25T08:58:12.643Z" level=DEBUG msg="hello world"
-time="2020-01-25T08:58:12.643Z" level=INFO msg="more info" country=taiwan city=keelung
-time="2020-01-25T08:58:12.644Z" level=ERROR msg="oops..."
-time="2020-01-25T08:58:12.644Z" level=INFO msg="time to run" duration=2.0074ms
-```
-## How to run benchmark
-```
+## Benchmarks
+
+```shell
 go test -bench=. -benchmem -run=^bb -v
-```
-```
 goos: windows
 goarch: amd64
 pkg: github.com/jasonsoft/log

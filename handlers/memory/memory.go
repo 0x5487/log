@@ -20,9 +20,10 @@ func New() *Handler {
 }
 
 // Log implements log.Handler.
-func (h *Handler) Log(e log.Entry) {
+func (h *Handler) Log(e log.Entry) error {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 
 	h.Entries = append(h.Entries, e)
+	return nil
 }
