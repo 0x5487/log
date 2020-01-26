@@ -25,9 +25,10 @@ func New() *Console {
 }
 
 // Log handles the log entry
-func (c *Console) Log(e log.Entry) {
+func (c *Console) Log(e log.Entry) error {
 	msg := formatFunc(e)
 	fmt.Println(msg)
+	return nil
 }
 
 func formatFunc(entry log.Entry) string {

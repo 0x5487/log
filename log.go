@@ -2,7 +2,6 @@ package log
 
 import (
 	"context"
-	"os"
 	"sync"
 )
 
@@ -13,21 +12,17 @@ var (
 
 // Handler is an interface that log handlers need to be implemented
 type Handler interface {
-	Log(Entry)
+	Log(Entry) error
 }
 
 type logger struct {
-	host          string
-	appID         string
 	handlers      map[Level][]Handler
 	defaultFields Fields
 	rw            sync.RWMutex
 }
 
 func new() *logger {
-	hostname, _ := os.Hostname()
 	logger := logger{
-		host:          hostname,
 		handlers:      map[Level][]Handler{},
 		defaultFields: make(Fields, 0),
 	}
@@ -172,17 +167,6 @@ func WithError(err error) Entry {
 func Trace(msg string) Entry {
 	e := newEntry(_logger)
 	return e.Trace(msg)
-}
-
-// SetAppID set a constant application key
-// that will be set on all log Entry objects
-func SetAppID(id string) {
-	_logger.appID = id
-}
-
-// AppID return an application key
-func AppID() string {
-	return _logger.appID
 }
 
 var (

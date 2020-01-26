@@ -2,6 +2,7 @@ package log
 
 import (
 	"fmt"
+	stdlog "log"
 	"os"
 	"strings"
 	"time"
@@ -15,8 +16,6 @@ type Entry struct {
 	logger *logger
 	start  time.Time
 
-	AppID     string    `json:"app_id"`
-	Host      string    `json:"host"`
 	Level     Level     `json:"level"`
 	Message   string    `json:"message"`
 	Timestamp time.Time `json:"timestamp"`
@@ -26,8 +25,6 @@ type Entry struct {
 func newEntry(l *logger) Entry {
 	e := Entry{}
 	e.logger = l
-	e.Host = l.host
-	e.AppID = l.appID
 	e.Fields = l.defaultFields
 	return e
 }
@@ -207,7 +204,12 @@ func handler(e Entry) {
 	e.logger.rw.RLock()
 	defer e.logger.rw.RUnlock()
 
+	var err error
 	for _, h := range e.logger.handlers[e.Level] {
-		h.Log(e)
+		err = h.Log(e)
+		if err != nil {
+			stdlog.Printf("error logging: %s", err.Error())
+		}
+
 	}
 }

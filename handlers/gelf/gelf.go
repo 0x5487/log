@@ -2,6 +2,7 @@ package gelf
 
 import (
 	"encoding/json"
+	"fmt"
 	"net"
 	"net/url"
 	"strings"
@@ -20,7 +21,7 @@ type Gelf struct {
 func New(connectionString string) *Gelf {
 	url, err := url.Parse(connectionString)
 	if err != nil {
-		panic(err)
+		panic(fmt.Errorf("graylog connectionString is wrong: %v", err))
 	}
 	g := &Gelf{
 		url: url,
@@ -29,22 +30,27 @@ func New(connectionString string) *Gelf {
 	return g
 }
 
+var (
+	empty byte
+)
+
 // Log handles the log entry
-func (g *Gelf) Log(e log.Entry) {
-	var empty byte
+func (g *Gelf) Log(e log.Entry) error {
 	if g.conn != nil {
 		payload := entryToPayload(e)
 		payload = append(payload, empty) // when we use tcp, we need to add null byte in the end.
 		_, err := g.conn.Write(payload)
 		if err != nil {
-			println("failed to write: %v", err)
 			_ = g.conn.Close()
 			g.conn = nil
-		} else {
-			//msg := fmt.Sprintf("payload size: %d", size)
-			//println(msg)
+			return fmt.Errorf("send log to graylog failed: %v", err)
 		}
+
+		//msg := fmt.Sprintf("payload size: %d", size)
+		//println(msg)
 	}
+
+	return nil
 }
 
 func (g *Gelf) manageConnections() {
@@ -80,12 +86,10 @@ func (g *Gelf) manageConnections() {
 func entryToPayload(e log.Entry) []byte {
 	items := make(map[string]interface{})
 	items["version"] = "1.1"
-	items["host"] = e.Host
 	items["level"] = toGelfLevel(e.Level)
 	items["short_message"] = e.Message
 	items["full_message"] = e.Message
 	items["timestamp"] = float64(e.Timestamp.UnixNano()) / float64(time.Second)
-	items["_app_id"] = e.AppID
 
 	for key, value := range e.Fields {
 		switch key {
