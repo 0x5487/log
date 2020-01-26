@@ -30,9 +30,7 @@ func New(connectionString string) *Gelf {
 	return g
 }
 
-var (
-	empty byte
-)
+var empty byte
 
 // Log handles the log entry
 func (g *Gelf) Log(e log.Entry) error {
@@ -43,11 +41,14 @@ func (g *Gelf) Log(e log.Entry) error {
 		if err != nil {
 			_ = g.conn.Close()
 			g.conn = nil
-			return fmt.Errorf("send log to graylog failed: %v", err)
+			return fmt.Errorf("send log to graylog failed: %w", err)
 		}
 
-		//msg := fmt.Sprintf("payload size: %d", size)
-		//println(msg)
+		// msg := fmt.Sprintf("payload size: %d", size)
+		// println(msg)
+
+		// msg = fmt.Sprintf("payload body: %s", string(payload))
+		// println(msg)
 	}
 
 	return nil
@@ -93,7 +94,7 @@ func entryToPayload(e log.Entry) []byte {
 
 	for key, value := range e.Fields {
 		switch key {
-		case "short_message":
+		case "short_message", "host":
 			items[key] = value
 		default:
 			items["_"+key] = value
