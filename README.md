@@ -13,7 +13,7 @@ It is a simple structured logging package for Go.
 * work with error interface 
 * Go standard context is supported
 
-## handlers
+## Handlers
 * console
 * gelf (graylog)
 * memory (unit test)
