@@ -37,7 +37,7 @@ func formatFunc(entry log.Entry) string {
 
 	builder := strings.Builder{}
 
-	_, _ = builder.WriteString(fmt.Sprintf("time=\"%s\" level=%s msg=\"%s\" ", time, level, entry.Message))
+	_, _ = builder.WriteString(fmt.Sprintf("[%s] %s %s ", level, time, entry.Message))
 
 	// custom fields to string
 	var b []byte

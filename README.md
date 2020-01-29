@@ -65,10 +65,10 @@ func main() {
 ```
 Output
 ```shell
-time="2020-01-29T02:00:53.892Z" level=DEBUG msg="hello world" app_id=santa env=dev
-time="2020-01-29T02:00:53.892Z" level=INFO msg="more info" env=dev city=keelung app_id=santa
-time="2020-01-29T02:00:53.892Z" level=ERROR msg="oops..." env=dev error=something bad happened app_id=santa
-time="2020-01-29T02:00:53.892Z" level=INFO msg="time to run" app_id=santa duration=0s env=dev
+[DEBUG] 2020-01-29T02:45:00.315Z hello world env=dev app_id=santa
+[INFO] 2020-01-29T02:45:00.315Z more info app_id=santa env=dev city=keelung
+[ERROR] 2020-01-29T02:45:00.316Z oops... error=something bad happened app_id=santa env=dev
+[INFO] 2020-01-29T02:45:00.316Z time to run duration=1.004ms app_id=santa env=dev
 ```
 ## Benchmarks
 Run on Macbook Pro 15-inch 2018 using go version go1.13.5 windows 10 os
