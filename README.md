@@ -5,10 +5,11 @@ It is a simple structured logging package for Go.
 
 * easy and configurable
 * built-in some handlers
-* goroutine safe
+* allow to use different level for each handler
+* goroutine safety
 * allow to add default fields to every log.  ( ex.  You maybe want to add `app_id` per each app or `env` per each environment)
-* colored text for console handler
-* trace duration
+* colored text for console handler (`linux`, `mac`, and `windows` are supported)
+* trace time
 * work with error interface 
 * Go standard context is supported
 
