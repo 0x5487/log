@@ -201,8 +201,8 @@ func (e Entry) Stop() {
 func handler(e Entry) {
 	e.Timestamp = time.Now().UTC()
 
-	e.logger.rw.RLock()
-	defer e.logger.rw.RUnlock()
+	e.logger.rwMutex.RLock()
+	defer e.logger.rwMutex.RUnlock()
 
 	var err error
 	for _, h := range e.logger.handlers[e.Level] {

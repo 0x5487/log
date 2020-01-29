@@ -18,7 +18,7 @@ type Handler interface {
 type logger struct {
 	handlers      map[Level][]Handler
 	defaultFields Fields
-	rw            sync.RWMutex
+	rwMutex       sync.RWMutex
 }
 
 func new() *logger {
@@ -33,8 +33,8 @@ func new() *logger {
 // RegisterHandler adds a new Log Handler and specifies what log levels
 // the handler will be passed log entries for
 func RegisterHandler(handler Handler, levels ...Level) {
-	_logger.rw.Lock()
-	defer _logger.rw.Unlock()
+	_logger.rwMutex.Lock()
+	defer _logger.rwMutex.Unlock()
 
 	for _, level := range levels {
 		_logger.handlers[level] = append(_logger.handlers[level], handler)

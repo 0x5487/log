@@ -2,84 +2,55 @@ package console
 
 import (
 	"fmt"
-	"strconv"
-	"strings"
+	"io"
+	"sync"
 
+	"github.com/fatih/color"
 	"github.com/jasonsoft/log"
+	colorable "github.com/mattn/go-colorable"
 )
 
-const (
-	base10  = 10
-	space   = byte(' ')
-	equals  = byte('=')
-	newLine = byte('\n')
-)
+var colors = [...]*color.Color{
+	log.DebugLevel: color.New(color.FgWhite),
+	log.InfoLevel:  color.New(color.FgBlue),
+	log.WarnLevel:  color.New(color.FgYellow),
+	log.ErrorLevel: color.New(color.FgRed),
+	log.FatalLevel: color.New(color.FgRed),
+	log.PanicLevel: color.New(color.FgRed),
+}
+
+var bold = color.New(color.Bold)
 
 // Console is an instance of the console logger
 type Console struct {
+	mutex  sync.Mutex
+	writer io.Writer
 }
 
 // New create a new Console instance
 func New() *Console {
-	return &Console{}
+	return &Console{
+		writer: colorable.NewColorableStdout(),
+	}
 }
 
 // Log handles the log entry
-func (c *Console) Log(e log.Entry) error {
-	msg := formatFunc(e)
-	fmt.Println(msg)
-	return nil
-}
+func (h *Console) Log(e log.Entry) error {
+	color := colors[e.Level]
+	level := e.Level.String()
 
-func formatFunc(entry log.Entry) string {
-	time := entry.Timestamp.Format("2006-01-02T15:04:05.999Z")
-	level := entry.Level.String()
+	// fmt is not goroutine safe
+	// https://stackoverflow.com/questions/14694088/is-it-safe-for-more-than-one-goroutine-to-print-to-stdout
+	h.mutex.Lock()
+	defer h.mutex.Unlock()
 
-	builder := strings.Builder{}
+	color.Fprintf(h.writer, "%s %-50s", bold.Sprintf("%-8s", level), e.Message)
 
-	_, _ = builder.WriteString(fmt.Sprintf("[%s] %s %s ", level, time, entry.Message))
-
-	// custom fields to string
-	var b []byte
-	for key, value := range entry.Fields {
-		b = append(b, key...)
-		b = append(b, equals)
-
-		switch t := value.(type) {
-		case string:
-			b = append(b, t...)
-		case int:
-			b = strconv.AppendInt(b, int64(t), base10)
-		case int8:
-			b = strconv.AppendInt(b, int64(t), base10)
-		case int16:
-			b = strconv.AppendInt(b, int64(t), base10)
-		case int32:
-			b = strconv.AppendInt(b, int64(t), base10)
-		case int64:
-			b = strconv.AppendInt(b, t, base10)
-		case uint:
-			b = strconv.AppendUint(b, uint64(t), base10)
-		case uint8:
-			b = strconv.AppendUint(b, uint64(t), base10)
-		case uint16:
-			b = strconv.AppendUint(b, uint64(t), base10)
-		case uint32:
-			b = strconv.AppendUint(b, uint64(t), base10)
-		case uint64:
-			b = strconv.AppendUint(b, t, base10)
-		case float32:
-			b = strconv.AppendFloat(b, float64(t), 'f', -1, 32)
-		case float64:
-			b = strconv.AppendFloat(b, t, 'f', -1, 64)
-		case bool:
-			b = strconv.AppendBool(b, t)
-		default:
-			b = append(b, fmt.Sprintf("%#v", value)...)
-		}
-
-		b = append(b, space)
+	for key, value := range e.Fields {
+		fmt.Fprintf(h.writer, " %s=%v", color.Sprint(key), value)
 	}
-	_, _ = builder.Write(b)
-	return builder.String()
+
+	fmt.Fprintln(h.writer)
+
+	return nil
 }

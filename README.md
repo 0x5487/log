@@ -6,6 +6,7 @@ It is a simple sturctured logging package  for Go.
 * easy and configurable
 * bulit-in some handlers
 * allow to add default fields to every log.  ( ex.  You maybe want to add `app_id` per each app or `env` per each environment)
+* colored text for console handler
 * trace duration
 * work with error interface 
 * golang standard context is supported
@@ -64,13 +65,13 @@ func main() {
 }
 ```
 Output
-```shell
-[DEBUG] 2020-01-29T02:45:00.315Z hello world env=dev app_id=santa
-[INFO] 2020-01-29T02:45:00.315Z more info app_id=santa env=dev city=keelung
-[ERROR] 2020-01-29T02:45:00.316Z oops... error=something bad happened app_id=santa env=dev
-[INFO] 2020-01-29T02:45:00.316Z time to run duration=1.004ms app_id=santa env=dev
-```
+
+![](colored.png)
+
+
+
 ## Benchmarks
+
 Run on Macbook Pro 15-inch 2018 using go version go1.13.5 windows 10 os
 
 ```shell
