@@ -69,12 +69,12 @@ func TestWithFields(t *testing.T) {
 	e := h.Entries[0]
 	assert.Equal(t, "upload complete", e.Message)
 	assert.Equal(t, log.InfoLevel, e.Level)
-	assert.Equal(t, e.Fields, log.Fields{"file": "sloth.png"})
+	assert.Equal(t, log.Fields{"file": "sloth.png"}, e.Fields)
 
 	e = h.Entries[1]
 	assert.Equal(t, "uploading", e.Message)
 	assert.Equal(t, log.DebugLevel, e.Level)
-	assert.Equal(t, e.Fields, log.Fields{"file": "sloth.png", "source": "machine1"})
+	assert.Equal(t, log.Fields{"file": "sloth.png", "source": "machine1"}, e.Fields)
 }
 
 func TestWithError(t *testing.T) {
@@ -84,12 +84,20 @@ func TestWithError(t *testing.T) {
 	err := errors.New("something bad happened")
 	log.WithError(err).Error("too bad")
 
-	assert.Equal(t, 1, len(h.Entries))
+	err = nil
+	log.WithError(err).Error("err is nil")
+
+	assert.Equal(t, 2, len(h.Entries))
 
 	e := h.Entries[0]
 	assert.Equal(t, "too bad", e.Message)
 	assert.Equal(t, log.ErrorLevel, e.Level)
 	assert.Equal(t, log.Fields{"error": "something bad happened"}, e.Fields)
+
+	e = h.Entries[1]
+	assert.Equal(t, "err is nil", e.Message)
+	assert.Equal(t, log.ErrorLevel, e.Level)
+	assert.Equal(t, log.Fields{}, e.Fields)
 }
 
 func TestTrace(t *testing.T) {
