@@ -1,20 +1,21 @@
 # log
-It is a simple sturctured logging package  for Go.
+It is a simple structured logging package for Go.
 
 ## Features
 
 * easy and configurable
-* bulit-in some handlers
+* built-in some handlers
+* goroutine safe
 * allow to add default fields to every log.  ( ex.  You maybe want to add `app_id` per each app or `env` per each environment)
 * colored text for console handler
 * trace duration
 * work with error interface 
-* golang standard context is supported
+* Go standard context is supported
 
 ## handlers
 * console
 * gelf (graylog)
-* memory (unit test purpose)
+* memory (unit test)
 * discard (benchmark)
 
 ## Installation
@@ -72,10 +73,11 @@ Output
 
 ## Benchmarks
 
-Run on Macbook Pro 15-inch 2018 using go version go1.13.5 windows 10 os
+Run on MacBook Pro 15-inch 2018 using go version go1.13.5 windows 10 OS
 
 ```shell
 go test -bench=. -benchmem -run=^bb -v
+
 goos: windows
 goarch: amd64
 pkg: github.com/jasonsoft/log
