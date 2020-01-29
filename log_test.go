@@ -23,6 +23,18 @@ func TestPrintf(t *testing.T) {
 	assert.Equal(t, log.InfoLevel, e.Level)
 }
 
+func TestFlush(t *testing.T) {
+	h := memory.New()
+	log.RegisterHandler(h, log.AllLevels...)
+
+	log.Info("logged in")
+
+	assert.Equal(t, 1, len(h.Entries))
+
+	log.Flush()
+	assert.Equal(t, 0, len(h.Entries))
+}
+
 func TestLevels(t *testing.T) {
 	h := memory.New()
 	log.RegisterHandler(h, log.InfoLevel)

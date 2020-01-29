@@ -42,6 +42,9 @@ func main() {
 	clog := console.New()
 	log.RegisterHandler(clog, log.AllLevels...)
 
+	// optional: allow handlers to clear all buffer
+	defer log.Flush()
+
 	// use withDefaultFields to add fields to every logs
 	log.WithDefaultFields(
 		log.Fields{
@@ -52,6 +55,8 @@ func main() {
 
 	// use trace to get how long it takes
 	defer log.Trace("time to run").Stop()
+
+	// print message use DEBUG level
 	log.Debug("hello world")
 
 	// log information with custom fileds

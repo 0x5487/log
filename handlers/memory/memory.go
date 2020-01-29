@@ -27,3 +27,12 @@ func (h *Handler) Log(e log.Entry) error {
 	h.Entries = append(h.Entries, e)
 	return nil
 }
+
+// Flush clear all buffer
+func (h *Handler) Flush() error {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
+	h.Entries = []log.Entry{}
+	return nil
+}

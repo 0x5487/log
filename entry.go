@@ -225,7 +225,7 @@ func handler(e Entry) {
 	defer e.logger.rwMutex.RUnlock()
 
 	var err error
-	for _, h := range e.logger.handlers[e.Level] {
+	for _, h := range e.logger.leveledHandlers[e.Level] {
 		err = h.Log(e)
 		if err != nil {
 			stdlog.Printf("error logging: %s", err.Error())

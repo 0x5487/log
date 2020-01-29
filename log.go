@@ -15,16 +15,22 @@ type Handler interface {
 	Log(Entry) error
 }
 
+// Flusher is an interface that allow handles have the ability to clear buffer
+type Flusher interface {
+	Flush() error
+}
+
 type logger struct {
-	handlers      map[Level][]Handler
-	defaultFields Fields
-	rwMutex       sync.RWMutex
+	handles         []Handler
+	leveledHandlers map[Level][]Handler
+	defaultFields   Fields
+	rwMutex         sync.RWMutex
 }
 
 func new() *logger {
 	logger := logger{
-		handlers:      map[Level][]Handler{},
-		defaultFields: make(Fields, 0),
+		leveledHandlers: map[Level][]Handler{},
+		defaultFields:   make(Fields, 0),
 	}
 
 	return &logger
@@ -37,8 +43,10 @@ func RegisterHandler(handler Handler, levels ...Level) {
 	defer _logger.rwMutex.Unlock()
 
 	for _, level := range levels {
-		_logger.handlers[level] = append(_logger.handlers[level], handler)
+		_logger.leveledHandlers[level] = append(_logger.leveledHandlers[level], handler)
 	}
+
+	_logger.handles = append(_logger.handles, handler)
 }
 
 // Debug level formatted message.
@@ -123,6 +131,16 @@ func Fatal(msg string) {
 func Fatalf(msg string, v ...interface{}) {
 	e := newEntry(_logger)
 	e.Fatalf(msg, v...)
+}
+
+// Flush clear all handler's buffer
+func Flush() {
+	for _, h := range _logger.handles {
+		flusher, ok := h.(Flusher)
+		if ok {
+			flusher.Flush()
+		}
+	}
 }
 
 // WithFields returns a log Entry with fields set
