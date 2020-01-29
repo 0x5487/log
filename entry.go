@@ -4,12 +4,29 @@ import (
 	"fmt"
 	stdlog "log"
 	"os"
+	"sort"
 	"strings"
 	"time"
 )
 
 // Fields represents a map of entry level data used for structured logging.
 type Fields map[string]interface{}
+
+// Names returns field names sorted.
+// map is not
+func (f Fields) Names() (v []string) {
+	for k := range f {
+		v = append(v, k)
+	}
+
+	sort.Strings(v)
+	return
+}
+
+// Get field value by name.
+func (f Fields) Get(name string) interface{} {
+	return f[name]
+}
 
 // Entry defines a single log entry
 type Entry struct {

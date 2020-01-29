@@ -38,6 +38,7 @@ func New() *Console {
 func (h *Console) Log(e log.Entry) error {
 	color := colors[e.Level]
 	level := e.Level.String()
+	names := e.Fields.Names()
 
 	// fmt is not goroutine safe
 	// https://stackoverflow.com/questions/14694088/is-it-safe-for-more-than-one-goroutine-to-print-to-stdout
@@ -46,8 +47,8 @@ func (h *Console) Log(e log.Entry) error {
 
 	color.Fprintf(h.writer, "%s %-50s", bold.Sprintf("%-8s", level), e.Message)
 
-	for key, value := range e.Fields {
-		fmt.Fprintf(h.writer, " %s=%v", color.Sprint(key), value)
+	for _, name := range names {
+		fmt.Fprintf(h.writer, " %s=%v", color.Sprint(name), e.Fields.Get(name))
 	}
 
 	fmt.Fprintln(h.writer)
