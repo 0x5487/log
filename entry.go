@@ -173,6 +173,9 @@ func (e Entry) WithFields(fields Fields) Entry {
 
 // WithError returns a new entry with the "error" set to `err`.
 func (e Entry) WithError(err error) Entry {
+	if err == nil {
+		return e
+	}
 	return e.WithField("error", fmt.Sprintf("%+v", err))
 }
 

@@ -1,8 +1,6 @@
 package main
 
 import (
-	"errors"
-
 	"github.com/jasonsoft/log"
 	"github.com/jasonsoft/log/handlers/console"
 )
@@ -31,6 +29,7 @@ func main() {
 	log.WithFields(fields).Infof("more info")
 
 	// log error struct and print error message
-	err := errors.New("something bad happened")
+	//err := errors.New("something bad happened")
+	var err error
 	log.WithError(err).Error("oops...")
 }
