@@ -16,6 +16,13 @@ It is a simple sturctured logging package  for Go.
 * memory (unit test purpose)
 * discard (benchmark)
 
+## Installation
+Use go get 
+
+```go
+go get -u github.com/jasonsoft/log
+```
+
 ## Example
 
 ```go
