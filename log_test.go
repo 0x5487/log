@@ -77,6 +77,22 @@ func TestWithFields(t *testing.T) {
 	assert.Equal(t, log.Fields{"file": "sloth.png", "source": "machine1"}, e.Fields)
 }
 
+func TestLogger_WithField(t *testing.T) {
+	h := memory.New()
+	log.RegisterHandler(h, log.AllLevels...)
+
+	logger := log.WithField("file", "sloth.png").WithField("user", "Tobi")
+	logger.Debug("uploading")
+	logger.Info("upload complete")
+
+	assert.Equal(t, 2, len(h.Entries))
+
+	e := h.Entries[0]
+	assert.Equal(t, "uploading", e.Message)
+	assert.Equal(t, log.DebugLevel, e.Level)
+	assert.Equal(t, log.Fields{"file": "sloth.png", "user": "Tobi"}, e.Fields)
+}
+
 func TestWithError(t *testing.T) {
 	h := memory.New()
 	log.RegisterHandler(h, log.AllLevels...)
