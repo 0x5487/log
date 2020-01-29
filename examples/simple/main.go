@@ -8,19 +8,29 @@ import (
 )
 
 func main() {
+	// use console handler to log all level logs
 	clog := console.New()
-	log.RegisterHandler(clog, log.AllLevels...) // use console handler to log all level log
+	log.RegisterHandler(clog, log.AllLevels...)
 
-	defer log.Trace("time to run").Stop() // use trace to know how long it takes
+	// use withDefaultFields to add fields to every logs
+	log.WithDefaultFields(
+		log.Fields{
+			"app_id": "santa",
+			"env":    "dev",
+		},
+	)
 
+	// use trace to get how long it takes
+	defer log.Trace("time to run").Stop()
 	log.Debug("hello world")
 
+	// log information with custom fileds
 	fields := log.Fields{
-		"city":    "keelung",
-		"country": "taiwan",
+		"city": "keelung",
 	}
-	log.WithFields(fields).Infof("more info") // log information with custom fileds
+	log.WithFields(fields).Infof("more info")
 
+	// log error struct and print error message
 	err := errors.New("something bad happened")
-	log.WithError(err).Error("oops...") // log error struct and print error message
+	log.WithError(err).Error("oops...")
 }

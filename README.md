@@ -29,29 +29,39 @@ import (
 )
 
 func main() {
+	// use console handler to log all level logs
 	clog := console.New()
-	log.RegisterHandler(clog, log.AllLevels...) // use console handler to log all level log
+	log.RegisterHandler(clog, log.AllLevels...)
 
-	defer log.Trace("time to run").Stop() // use trace to know how long it takes
+	// use withDefaultFields to add fields to every logs
+	log.WithDefaultFields(
+		log.Fields{
+			"app_id": "santa",
+			"env":    "dev",
+		},
+	)
 
+	// use trace to get how long it takes
+	defer log.Trace("time to run").Stop()
 	log.Debug("hello world")
 
+	// log information with custom fileds
 	fields := log.Fields{
-		"city":    "keelung",
-		"country": "taiwan",
+		"city": "keelung",
 	}
-	log.WithFields(fields).Infof("more info") // log information with custom fileds
+	log.WithFields(fields).Infof("more info")
 
+	// log error struct and print error message
 	err := errors.New("something bad happened")
-	log.WithError(err).Error("oops...") // log error struct and print error message
+	log.WithError(err).Error("oops...")
 }
 ```
 Output
 ```shell
-time="2020-01-26T03:48:58.359Z" level=DEBUG msg="hello world"
-time="2020-01-26T03:48:58.359Z" level=INFO msg="more info" city=keelung country=taiwan
-time="2020-01-26T03:48:58.359Z" level=ERROR msg="oops..." error=something bad happened
-time="2020-01-26T03:48:58.36Z" level=INFO msg="time to run" duration=983.1µs
+time="2020-01-29T02:00:53.892Z" level=DEBUG msg="hello world" app_id=santa env=dev
+time="2020-01-29T02:00:53.892Z" level=INFO msg="more info" env=dev city=keelung app_id=santa
+time="2020-01-29T02:00:53.892Z" level=ERROR msg="oops..." env=dev error=something bad happened app_id=santa
+time="2020-01-29T02:00:53.892Z" level=INFO msg="time to run" app_id=santa duration=0s env=dev
 ```
 ## Benchmarks
 Run on Macbook Pro 15-inch 2018 using go version go1.13.5 windows 10 os
