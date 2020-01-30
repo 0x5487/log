@@ -39,6 +39,7 @@ func (p Level) String() string {
 	return levelNames[p]
 }
 
+// GetLevelsFromMinLevel returns Levels array which above minLevel
 func GetLevelsFromMinLevel(minLevel string) []Level {
 	minLevel = strings.ToLower(minLevel)
 	switch minLevel {

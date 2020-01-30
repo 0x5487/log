@@ -60,20 +60,6 @@ func (e Entry) Debugf(msg string, v ...interface{}) {
 	handler(e)
 }
 
-// Println Info level message.
-func (e Entry) Println(msg string) {
-	e.Level = InfoLevel
-	e.Message = msg
-	handler(e)
-}
-
-// Print Info level message.
-func (e Entry) Print(msg string) {
-	e.Level = InfoLevel
-	e.Message = msg
-	handler(e)
-}
-
 // Info level message.
 func (e Entry) Info(msg string) {
 	e.Level = InfoLevel
@@ -228,7 +214,7 @@ func handler(e Entry) {
 	for _, h := range e.logger.leveledHandlers[e.Level] {
 		err = h.Log(e)
 		if err != nil {
-			stdlog.Printf("error logging: %s", err.Error())
+			stdlog.Printf("log: log failed: %v", err)
 		}
 
 	}

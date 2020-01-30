@@ -2,6 +2,7 @@ package log
 
 import (
 	"context"
+	stdlog "log"
 	"sync"
 )
 
@@ -59,18 +60,6 @@ func Debug(msg string) {
 func Debugf(msg string, v ...interface{}) {
 	e := newEntry(_logger)
 	e.Debugf(msg, v...)
-}
-
-// Println Info level message.
-func Println(msg string) {
-	e := newEntry(_logger)
-	e.Println(msg)
-}
-
-// Print Info level message.
-func Print(msg string) {
-	e := newEntry(_logger)
-	e.Print(msg)
 }
 
 // Info level formatted message.
@@ -138,7 +127,10 @@ func Flush() {
 	for _, h := range _logger.handles {
 		flusher, ok := h.(Flusher)
 		if ok {
-			flusher.Flush()
+			err := flusher.Flush()
+			if err != nil {
+				stdlog.Printf("log: flush log handler: %v", err)
+			}
 		}
 	}
 }

@@ -45,7 +45,7 @@ func (h *Console) Log(e log.Entry) error {
 	h.mutex.Lock()
 	defer h.mutex.Unlock()
 
-	color.Fprintf(h.writer, "%s %-50s", bold.Sprintf("%-8s", level), e.Message)
+	_, _ = color.Fprintf(h.writer, "%s %-50s", bold.Sprintf("%-8s", level), e.Message)
 
 	for _, name := range names {
 		fmt.Fprintf(h.writer, " %s=%v", color.Sprint(name), e.Fields.Get(name))
