@@ -54,6 +54,15 @@ func (g *Gelf) Log(e log.Entry) error {
 	return nil
 }
 
+// Flush clear all buffer and close connection
+func (g *Gelf) Flush() error {
+	if g.conn != nil {
+		g.conn.Close()
+	}
+
+	return nil
+}
+
 func (g *Gelf) manageConnections() {
 	var err error
 	if strings.EqualFold(g.url.Scheme, "tcp") {

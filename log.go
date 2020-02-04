@@ -16,7 +16,7 @@ type Handler interface {
 	Log(Entry) error
 }
 
-// Flusher is an interface that allow handles have the ability to clear buffer
+// Flusher is an interface that allow handles have the ability to clear buffer and close connection
 type Flusher interface {
 	Flush() error
 }
