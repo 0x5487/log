@@ -32,6 +32,14 @@ func New(connectionString string) *Gelf {
 
 var empty byte
 
+func (g *Gelf) close() error {
+	if g.conn != nil {
+		_ = g.conn.Close()
+		g.conn = nil
+	}
+	return nil
+}
+
 // Log handles the log entry
 func (g *Gelf) Log(e log.Entry) error {
 	if g.conn != nil {
@@ -39,8 +47,7 @@ func (g *Gelf) Log(e log.Entry) error {
 		payload = append(payload, empty) // when we use tcp, we need to add null byte in the end.
 		_, err := g.conn.Write(payload)
 		if err != nil {
-			_ = g.conn.Close()
-			g.conn = nil
+			_ = g.close()
 			return fmt.Errorf("send log to graylog failed: %w", err)
 		}
 
@@ -56,11 +63,7 @@ func (g *Gelf) Log(e log.Entry) error {
 
 // Flush clear all buffer and close connection
 func (g *Gelf) Flush() error {
-	if g.conn != nil {
-		g.conn.Close()
-	}
-
-	return nil
+	return g.close()
 }
 
 func (g *Gelf) manageConnections() {
