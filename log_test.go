@@ -3,11 +3,9 @@ package log_test
 import (
 	"context"
 	"errors"
-	"fmt"
 	"testing"
 
 	"github.com/jasonsoft/log"
-	"github.com/jasonsoft/log/handlers/discard"
 	"github.com/jasonsoft/log/handlers/memory"
 	"github.com/stretchr/testify/assert"
 )
@@ -172,50 +170,4 @@ func TestWithDefaultFields(t *testing.T) {
 	assert.Equal(t, log.DebugLevel, e.Level)
 	assert.Equal(t, e.Fields, log.Fields{"app_id": "santa", "env": "dev", "file": "sloth.png"})
 
-}
-
-func BenchmarkSmall(b *testing.B) {
-	h := discard.New()
-	log.RegisterHandler(h, log.InfoLevel)
-
-	for i := 0; i < b.N; i++ {
-		log.Info("login")
-	}
-}
-
-func BenchmarkMedium(b *testing.B) {
-	h := discard.New()
-	log.RegisterHandler(h, log.InfoLevel)
-
-	for i := 0; i < b.N; i++ {
-		log.WithFields(log.Fields{
-			"file": "sloth.png",
-			"type": "image/png",
-			"size": 1 << 20,
-		}).Info("upload")
-	}
-}
-
-func BenchmarkLarge(b *testing.B) {
-	h := discard.New()
-	log.RegisterHandler(h, log.InfoLevel)
-
-	err := fmt.Errorf("boom")
-
-	for i := 0; i < b.N; i++ {
-		log.WithFields(log.Fields{
-			"file": "sloth.png",
-			"type": "image/png",
-			"size": 1 << 20,
-		}).
-			WithFields(log.Fields{
-				"some":     "more",
-				"data":     "here",
-				"whatever": "blah blah",
-				"more":     "stuff",
-				"context":  "such useful",
-				"much":     "fun",
-			}).
-			WithError(err).Error("upload failed")
-	}
 }

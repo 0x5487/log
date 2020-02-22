@@ -205,17 +205,16 @@ func (e Entry) Stop() {
 }
 
 func handler(e Entry) {
-	e.Timestamp = time.Now().UTC()
-
-	e.logger.rwMutex.RLock()
-	defer e.logger.rwMutex.RUnlock()
+	// I guess we don't need to lock here and the performance can be improved
+	// e.logger.rwMutex.RLock()
+	// defer e.logger.rwMutex.RUnlock()
 
 	var err error
 	for _, h := range e.logger.leveledHandlers[e.Level] {
+		e.Timestamp = time.Now().UTC()
 		err = h.Log(e)
 		if err != nil {
 			stdlog.Printf("log: log failed: %v", err)
 		}
-
 	}
 }
