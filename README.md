@@ -94,3 +94,9 @@ PASS
 ok      github.com/jasonsoft/log        4.604s
 ```
 
+## Code Coverage
+coverage: 64.9% of statements
+
+```shell
+go test -coverprofile=c.out && go tool cover -html=c.out
+```

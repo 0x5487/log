@@ -23,9 +23,9 @@ func TestPrintf(t *testing.T) {
 
 func TestFlush(t *testing.T) {
 	h := memory.New()
-	log.RegisterHandler(h, log.AllLevels...)
+	log.RegisterHandler(h, log.GetLevelsFromMinLevel("debug")...)
 
-	log.Info("logged in")
+	log.Debugf("logged in")
 
 	assert.Equal(t, 1, len(h.Entries))
 
@@ -35,16 +35,30 @@ func TestFlush(t *testing.T) {
 
 func TestLevels(t *testing.T) {
 	h := memory.New()
-	log.RegisterHandler(h, log.InfoLevel)
+	log.RegisterHandler(h, log.DebugLevel, log.InfoLevel, log.WarnLevel, log.ErrorLevel)
 
-	log.Debug("uploading")
-	log.Info("upload complete")
+	log.Debug("debug1")
+	log.Info("info1")
+	log.Warn("warn1")
+	log.Error("error1")
 
-	assert.Equal(t, 1, len(h.Entries))
+	assert.Equal(t, 4, len(h.Entries))
 
 	e := h.Entries[0]
-	assert.Equal(t, "upload complete", e.Message)
+	assert.Equal(t, "debug1", e.Message)
+	assert.Equal(t, log.DebugLevel, e.Level)
+
+	e = h.Entries[1]
+	assert.Equal(t, "info1", e.Message)
 	assert.Equal(t, log.InfoLevel, e.Level)
+
+	e = h.Entries[2]
+	assert.Equal(t, "warn1", e.Message)
+	assert.Equal(t, log.WarnLevel, e.Level)
+
+	e = h.Entries[3]
+	assert.Equal(t, "error1", e.Message)
+	assert.Equal(t, log.ErrorLevel, e.Level)
 }
 
 func TestContext(t *testing.T) {
@@ -55,13 +69,13 @@ func TestContext(t *testing.T) {
 	ctx = log.NewContext(ctx, log.WithFields(log.Fields{"request_id": 123}))
 
 	logger := log.FromContext(ctx)
-	logger.Info("request test")
+	logger.Warnf("request test")
 
 	assert.Equal(t, 1, len(h.Entries))
 
 	e := h.Entries[0]
 	assert.Equal(t, "request test", e.Message)
-	assert.Equal(t, log.InfoLevel, e.Level)
+	assert.Equal(t, log.WarnLevel, e.Level)
 	assert.Equal(t, log.Fields{"request_id": 123}, e.Fields)
 }
 
@@ -108,7 +122,7 @@ func TestWithError(t *testing.T) {
 	log.RegisterHandler(h, log.AllLevels...)
 
 	err := errors.New("something bad happened")
-	log.WithError(err).Error("too bad")
+	log.WithError(err).Errorf("too bad %s", err.Error())
 
 	err = nil
 	log.WithError(err).Error("err is nil")
@@ -116,7 +130,7 @@ func TestWithError(t *testing.T) {
 	assert.Equal(t, 2, len(h.Entries))
 
 	e := h.Entries[0]
-	assert.Equal(t, "too bad", e.Message)
+	assert.Equal(t, "too bad something bad happened", e.Message)
 	assert.Equal(t, log.ErrorLevel, e.Level)
 	assert.Equal(t, log.Fields{"error": "something bad happened"}, e.Fields)
 
@@ -131,18 +145,17 @@ func TestTrace(t *testing.T) {
 	log.RegisterHandler(h, log.AllLevels...)
 
 	func() (err error) {
-		defer log.WithField("file", "sloth.png").Trace("upload").Stop()
+		defer log.Trace("upload").Stop()
 		return nil
 	}()
 
 	assert.Equal(t, 1, len(h.Entries))
-	{
-		e := h.Entries[0]
-		assert.Equal(t, "upload", e.Message)
-		assert.Equal(t, log.InfoLevel, e.Level)
-		assert.Equal(t, e.Fields["file"], "sloth.png")
-		assert.IsType(t, e.Fields["duration"], "0")
-	}
+
+	e := h.Entries[0]
+	assert.Equal(t, "upload", e.Message)
+	assert.Equal(t, log.InfoLevel, e.Level)
+	assert.IsType(t, e.Fields["duration"], "0")
+
 }
 
 func TestWithDefaultFields(t *testing.T) {
