@@ -9,7 +9,7 @@ require (
 	github.com/go-kit/kit v0.9.0
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/jasonsoft/log v1.0.1
-	github.com/rs/zerolog v1.16.0
+	github.com/rs/zerolog v1.18.0
 	github.com/sirupsen/logrus v1.4.2
 	go.uber.org/multierr v1.3.0
 	go.uber.org/zap v1.14.0

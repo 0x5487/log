@@ -24,14 +24,14 @@ type Flusher interface {
 type logger struct {
 	handles         []Handler
 	leveledHandlers map[Level][]Handler
-	defaultFields   Fields
+	defaultFields   []Fields
 	rwMutex         sync.RWMutex
 }
 
 func new() *logger {
 	logger := logger{
 		leveledHandlers: map[Level][]Handler{},
-		defaultFields:   make(Fields, 0),
+		defaultFields:   []Fields{},
 	}
 
 	return &logger
@@ -149,21 +149,11 @@ func WithField(key string, value interface{}) Entry {
 
 // WithDefaultFields adds fields to every entry instance
 func WithDefaultFields(fields Fields) {
-	newFields := Fields{}
+	f := []Fields{}
+	f = append(f, _logger.defaultFields...)
+	f = append(f, fields)
 
-	if _logger.defaultFields != nil {
-		for k, val := range _logger.defaultFields {
-			newFields[k] = val
-		}
-	}
-
-	if fields != nil {
-		for k, val := range fields {
-			newFields[k] = val
-		}
-	}
-
-	_logger.defaultFields = newFields
+	_logger.defaultFields = f
 }
 
 // WithError returns a new entry with the "error" set to `err`.

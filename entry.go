@@ -36,7 +36,7 @@ type Entry struct {
 	Level     Level     `json:"level"`
 	Message   string    `json:"message"`
 	Timestamp time.Time `json:"timestamp"`
-	Fields    Fields    `json:"fields"`
+	Fields    []Fields  `json:"fields"`
 }
 
 func newEntry(l *logger) Entry {
@@ -141,19 +141,11 @@ func (e Entry) WithField(key string, value interface{}) Entry {
 
 // WithFields adds the provided fields to the current entry
 func (e Entry) WithFields(fields Fields) Entry {
-	newFields := Fields{}
-	if e.Fields != nil {
-		for k, val := range e.Fields {
-			newFields[k] = val
-		}
-	}
-	if fields != nil {
-		for k, val := range fields {
-			newFields[k] = val
-		}
-	}
+	f := []Fields{}
+	f = append(f, e.Fields...)
+	f = append(f, fields)
 
-	e.Fields = newFields
+	e.Fields = f
 	return e
 }
 
