@@ -215,7 +215,7 @@ func handler(e Entry) {
 	// e.logger.rwMutex.RLock()
 	// defer e.logger.rwMutex.RUnlock()
 
-	for _, h := range e.logger.cacheLeveledHandler(e.Level) {
+	for _, h := range e.logger.cacheLeveledHandlers(e.Level) {
 		e.Timestamp = time.Now().UTC()
 		e.Fields = e.mergedFields()
 		err := h.Log(e)

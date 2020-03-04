@@ -14,7 +14,8 @@ func main() {
 
 	graylog := gelf.New("tcp://10.1.1.181:12201")
 	log.RegisterHandler(graylog, log.AllLevels...)
-	defer graylog.Flush()
+
+	defer log.Flush()
 
 	log.WithDefaultFields(log.Fields{
 		"app_id": "santa",

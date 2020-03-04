@@ -10,6 +10,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestNoHandler(t *testing.T) {
+	log.Info("no handler")
+}
+
 func TestPrintf(t *testing.T) {
 	h := memory.New()
 	log.RegisterHandler(h, log.AllLevels...)

@@ -22,11 +22,11 @@ type Flusher interface {
 }
 
 type logger struct {
-	handles             []Handler
-	leveledHandlers     map[Level][]Handler
-	cacheLeveledHandler func(level Level) []Handler
-	defaultFields       []Fields
-	rwMutex             sync.RWMutex
+	handles              []Handler
+	leveledHandlers      map[Level][]Handler
+	cacheLeveledHandlers func(level Level) []Handler
+	defaultFields        []Fields
+	rwMutex              sync.RWMutex
 }
 
 func new() *logger {
@@ -35,6 +35,7 @@ func new() *logger {
 		defaultFields:   []Fields{},
 	}
 
+	logger.cacheLeveledHandlers = logger.getLeveledHandlers()
 	return &logger
 }
 
@@ -77,7 +78,7 @@ func RegisterHandler(handler Handler, levels ...Level) {
 	}
 
 	_logger.handles = append(_logger.handles, handler)
-	_logger.cacheLeveledHandler = _logger.getLeveledHandlers()
+	_logger.cacheLeveledHandlers = _logger.getLeveledHandlers()
 }
 
 // Debug level formatted message.
