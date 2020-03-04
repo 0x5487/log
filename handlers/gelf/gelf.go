@@ -1,6 +1,7 @@
 package gelf
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	stdlog "log"
@@ -14,8 +15,9 @@ import (
 
 // Gelf is an instance of the Gelf logger
 type Gelf struct {
-	conn net.Conn
-	url  *url.URL
+	conn           net.Conn
+	bufferedWriter *bufio.Writer
+	url            *url.URL
 }
 
 // New create a new Gelf instance
@@ -46,7 +48,7 @@ func (g *Gelf) Log(e log.Entry) error {
 	if g.conn != nil {
 		payload := entryToPayload(e)
 		payload = append(payload, empty) // when we use tcp, we need to add null byte in the end.
-		_, err := g.conn.Write(payload)
+		_, err := g.bufferedWriter.Write(payload)
 		if err != nil {
 			_ = g.close()
 			return fmt.Errorf("send log to graylog failed: %w", err)
@@ -62,8 +64,9 @@ func (g *Gelf) Log(e log.Entry) error {
 	return nil
 }
 
-// Flush clear all buffer and close connection
+// Flush all buffer data and close connection
 func (g *Gelf) Flush() error {
+	_ = g.bufferedWriter.Flush()
 	return g.close()
 }
 
@@ -74,11 +77,13 @@ func (g *Gelf) manageConnections() {
 		if err != nil {
 			stdlog.Println("gelf tcp connection was failed:", err.Error())
 		}
+		g.bufferedWriter = bufio.NewWriter(g.conn)
 	} else {
 		g.conn, err = net.Dial("udp", g.url.Host)
 		if err != nil {
 			stdlog.Println("gelf udp connection was failed:", err.Error())
 		}
+		g.bufferedWriter = bufio.NewWriter(g.conn)
 	}
 
 	// check connection status every 1 second
@@ -89,7 +94,7 @@ func (g *Gelf) manageConnections() {
 				newConn, err := net.Dial("tcp", g.url.Host)
 				if err == nil {
 					g.conn = newConn
-					println("created new connection")
+					stdlog.Println("created new connection")
 				}
 			}
 			time.Sleep(1 * time.Second)
