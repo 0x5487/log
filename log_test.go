@@ -110,7 +110,7 @@ func TestWithFields(t *testing.T) {
 	assert.Equal(t, log.Fields{"file": "sloth.png"}, e.Fields)
 }
 
-func TestLogger_WithField(t *testing.T) {
+func TestWithField(t *testing.T) {
 	h := memory.New()
 	log.RegisterHandler(h, log.AllLevels...)
 
