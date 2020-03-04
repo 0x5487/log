@@ -91,28 +91,37 @@ func TestWithFields(t *testing.T) {
 		"env":    "dev",
 	})
 	logger.Info("upload complete")
-	logger = logger.WithField("source", "machine1")
-	logger.Debug("uploading")
 
-	assert.Equal(t, 2, len(h.Entries))
+	logger1 := logger.WithField("source", "machine1")
+	logger1.Debug("uploading")
+
+	logger.Warn("warning la")
+
+	assert.Equal(t, 3, len(h.Entries))
 
 	f := []log.Fields{}
-
-	e := h.Entries[0]
-	assert.Equal(t, "upload complete", e.Message)
-	assert.Equal(t, log.InfoLevel, e.Level)
 	f = append(f, log.Fields{
 		"app_id": "santa",
 		"env":    "dev",
 	})
+
+	// info
+	e := h.Entries[0]
+	assert.Equal(t, "upload complete", e.Message)
+	assert.Equal(t, log.InfoLevel, e.Level)
 	assert.Equal(t, f, e.Fields)
 
+	// debug
 	e = h.Entries[1]
 	assert.Equal(t, "uploading", e.Message)
 	assert.Equal(t, log.DebugLevel, e.Level)
+	f1 := append(f, log.Fields{"source": "machine1"})
+	assert.Equal(t, f1, e.Fields)
 
-	f = append(f, log.Fields{"source": "machine1"})
-
+	// warn
+	e = h.Entries[2]
+	assert.Equal(t, "warning la", e.Message)
+	assert.Equal(t, log.WarnLevel, e.Level)
 	assert.Equal(t, f, e.Fields)
 }
 

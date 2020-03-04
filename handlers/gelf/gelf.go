@@ -3,6 +3,7 @@ package gelf
 import (
 	"encoding/json"
 	"fmt"
+	stdlog "log"
 	"net"
 	"net/url"
 	"strings"
@@ -71,12 +72,12 @@ func (g *Gelf) manageConnections() {
 	if strings.EqualFold(g.url.Scheme, "tcp") {
 		g.conn, err = net.Dial("tcp", g.url.Host)
 		if err != nil {
-			println("gelf tcp connection was failed:", err.Error())
+			stdlog.Println("gelf tcp connection was failed:", err.Error())
 		}
 	} else {
 		g.conn, err = net.Dial("udp", g.url.Host)
 		if err != nil {
-			println("gelf udp connection was failed:", err.Error())
+			stdlog.Println("gelf udp connection was failed:", err.Error())
 		}
 	}
 
