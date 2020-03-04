@@ -32,17 +32,18 @@ func (f Fields) Get(name string) interface{} {
 type Entry struct {
 	logger *logger
 	start  time.Time
+	fields []Fields // private used; store all fields when withFields is called.  improve performance.
 
 	Level     Level     `json:"level"`
 	Message   string    `json:"message"`
 	Timestamp time.Time `json:"timestamp"`
-	Fields    []Fields  `json:"fields"`
+	Fields    Fields    `json:"fields"` // single map; easy to use for handlers
 }
 
 func newEntry(l *logger) Entry {
 	e := Entry{}
 	e.logger = l
-	e.Fields = l.defaultFields
+	e.fields = l.defaultFields
 	return e
 }
 
@@ -145,7 +146,7 @@ func (e Entry) WithFields(fields Fields) Entry {
 	//f = append(f, e.Fields...)
 	//f = append(f, fields)
 
-	e.Fields = append(e.Fields, fields)
+	e.fields = append(e.fields, fields)
 	return e
 }
 
@@ -163,6 +164,19 @@ func (e Entry) Trace(msg string) Entry {
 	e.Message = msg
 	e.start = time.Now().UTC()
 	return e
+}
+
+// mergedFields returns the fields list collapsed into a single map.
+func (e Entry) mergedFields() Fields {
+	f := Fields{}
+
+	for _, fields := range e.fields {
+		for k, v := range fields {
+			f[k] = v
+		}
+	}
+
+	return f
 }
 
 const (
@@ -204,6 +218,7 @@ func handler(e Entry) {
 	var err error
 	for _, h := range e.logger.leveledHandlers[e.Level] {
 		e.Timestamp = time.Now().UTC()
+		e.Fields = e.mergedFields()
 		err = h.Log(e)
 		if err != nil {
 			stdlog.Printf("log: log failed: %v", err)

@@ -76,53 +76,38 @@ func TestContext(t *testing.T) {
 	e := h.Entries[0]
 	assert.Equal(t, "request test", e.Message)
 	assert.Equal(t, log.WarnLevel, e.Level)
-
-	f := []log.Fields{}
-	f = append(f, log.Fields{"request_id": 123})
-	assert.Equal(t, f, e.Fields)
+	assert.Equal(t, log.Fields{"request_id": 123}, e.Fields)
 }
 
 func TestWithFields(t *testing.T) {
 	h := memory.New()
 	log.RegisterHandler(h, log.AllLevels...)
 
-	logger := log.WithFields(log.Fields{
-		"app_id": "santa",
-		"env":    "dev",
-	})
+	logger := log.WithFields(log.Fields{"file": "sloth.png"})
 	logger.Info("upload complete")
-
 	logger1 := logger.WithField("source", "machine1")
 	logger1.Debug("uploading")
-
 	logger.Warn("warning la")
 
 	assert.Equal(t, 3, len(h.Entries))
-
-	f := []log.Fields{}
-	f = append(f, log.Fields{
-		"app_id": "santa",
-		"env":    "dev",
-	})
 
 	// info
 	e := h.Entries[0]
 	assert.Equal(t, "upload complete", e.Message)
 	assert.Equal(t, log.InfoLevel, e.Level)
-	assert.Equal(t, f, e.Fields)
+	assert.Equal(t, log.Fields{"file": "sloth.png"}, e.Fields)
 
 	// debug
 	e = h.Entries[1]
 	assert.Equal(t, "uploading", e.Message)
 	assert.Equal(t, log.DebugLevel, e.Level)
-	f1 := append(f, log.Fields{"source": "machine1"})
-	assert.Equal(t, f1, e.Fields)
+	assert.Equal(t, log.Fields{"file": "sloth.png", "source": "machine1"}, e.Fields)
 
 	// warn
 	e = h.Entries[2]
 	assert.Equal(t, "warning la", e.Message)
 	assert.Equal(t, log.WarnLevel, e.Level)
-	assert.Equal(t, f, e.Fields)
+	assert.Equal(t, log.Fields{"file": "sloth.png"}, e.Fields)
 }
 
 func TestLogger_WithField(t *testing.T) {
@@ -138,11 +123,7 @@ func TestLogger_WithField(t *testing.T) {
 	e := h.Entries[0]
 	assert.Equal(t, "uploading", e.Message)
 	assert.Equal(t, log.DebugLevel, e.Level)
-
-	f := []log.Fields{}
-	f = append(f, log.Fields{"file": "sloth.png"})
-	f = append(f, log.Fields{"user": "Tobi"})
-	assert.Equal(t, f, e.Fields)
+	assert.Equal(t, log.Fields{"file": "sloth.png", "user": "Tobi"}, e.Fields)
 }
 
 func TestWithError(t *testing.T) {
@@ -160,15 +141,12 @@ func TestWithError(t *testing.T) {
 	e := h.Entries[0]
 	assert.Equal(t, "too bad something bad happened", e.Message)
 	assert.Equal(t, log.ErrorLevel, e.Level)
-
-	f := []log.Fields{}
-	f = append(f, log.Fields{"error": "something bad happened"})
-	assert.Equal(t, f, e.Fields)
+	assert.Equal(t, log.Fields{"error": "something bad happened"}, e.Fields)
 
 	e = h.Entries[1]
 	assert.Equal(t, "err is nil", e.Message)
 	assert.Equal(t, log.ErrorLevel, e.Level)
-	assert.Equal(t, []log.Fields{}, e.Fields)
+	assert.Equal(t, log.Fields{}, e.Fields)
 }
 
 func TestTrace(t *testing.T) {
@@ -185,8 +163,7 @@ func TestTrace(t *testing.T) {
 	e := h.Entries[0]
 	assert.Equal(t, "upload", e.Message)
 	assert.Equal(t, log.InfoLevel, e.Level)
-
-	assert.IsType(t, e.Fields[0].Get("duration"), "0")
+	assert.IsType(t, e.Fields["duration"], "0")
 
 }
 
@@ -208,19 +185,11 @@ func TestWithDefaultFields(t *testing.T) {
 	e := h.Entries[0]
 	assert.Equal(t, "upload complete", e.Message)
 	assert.Equal(t, log.InfoLevel, e.Level)
-
-	f := []log.Fields{}
-	f = append(f, log.Fields{
-		"app_id": "santa",
-		"env":    "dev",
-	})
-	assert.Equal(t, f, e.Fields)
+	assert.Equal(t, e.Fields, log.Fields{"app_id": "santa", "env": "dev"})
 
 	e = h.Entries[1]
 	assert.Equal(t, "debug test", e.Message)
 	assert.Equal(t, log.DebugLevel, e.Level)
-
-	f = append(f, log.Fields{"file": "sloth.png"})
-	assert.Equal(t, f, e.Fields)
+	assert.Equal(t, e.Fields, log.Fields{"app_id": "santa", "env": "dev", "file": "sloth.png"})
 
 }
