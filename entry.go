@@ -215,11 +215,10 @@ func handler(e Entry) {
 	// e.logger.rwMutex.RLock()
 	// defer e.logger.rwMutex.RUnlock()
 
-	var err error
 	for _, h := range e.logger.cacheLeveledHandler(e.Level) {
 		e.Timestamp = time.Now().UTC()
 		e.Fields = e.mergedFields()
-		err = h.Log(e)
+		err := h.Log(e)
 		if err != nil {
 			stdlog.Printf("log: log failed: %v", err)
 		}
