@@ -1,6 +1,6 @@
-# log
-It is a simple structured logging package for Go.
+# log [![GoDoc](https://godoc.org/github.com/jasonsoft/log?status.svg)](https://pkg.go.dev/github.com/jasonsoft/log?tab=doc)
 
+It is a simple structured logging package for Go. 
 ## Features
 
 * easy and configurable
