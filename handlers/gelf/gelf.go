@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/url"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/jasonsoft/log"
@@ -15,6 +16,7 @@ import (
 
 // Gelf is an instance of the Gelf logger
 type Gelf struct {
+	mutex          sync.Mutex
 	conn           net.Conn
 	bufferedWriter *bufio.Writer
 	url            *url.URL
@@ -48,7 +50,9 @@ func (g *Gelf) Log(e log.Entry) error {
 	if g.conn != nil {
 		payload := entryToPayload(e)
 		payload = append(payload, empty) // when we use tcp, we need to add null byte in the end.
+		g.mutex.Lock()
 		_, err := g.bufferedWriter.Write(payload)
+		g.mutex.Unlock()
 		if err != nil {
 			_ = g.close()
 			return fmt.Errorf("send log to graylog failed: %w", err)
