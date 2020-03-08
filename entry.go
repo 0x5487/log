@@ -142,7 +142,7 @@ func (e Entry) WithField(key string, value interface{}) Entry {
 
 // WithFields adds the provided fields to the current entry
 func (e Entry) WithFields(fields Fields) Entry {
-	f := []Fields{}
+	f := make([]Fields, 0, len(e.fields)+len(fields))
 	f = append(f, e.fields...)
 	f = append(f, fields)
 

@@ -180,7 +180,7 @@ func WithField(key string, value interface{}) Entry {
 
 // WithDefaultFields adds fields to every entry instance
 func WithDefaultFields(fields Fields) {
-	f := []Fields{}
+	f := make([]Fields, 0, len(_logger.defaultFields)+len(fields))
 	f = append(f, _logger.defaultFields...)
 	f = append(f, fields)
 
