@@ -3,6 +3,7 @@ package log_test
 import (
 	"context"
 	"errors"
+	"sync"
 	"testing"
 
 	"github.com/jasonsoft/log"
@@ -198,5 +199,37 @@ func TestWithDefaultFields(t *testing.T) {
 	assert.Equal(t, "debug test", e.Message)
 	assert.Equal(t, log.DebugLevel, e.Level)
 	assert.Equal(t, e.Fields, log.Fields{"app_id": "santa", "env": "dev", "file": "sloth.png"})
+
+}
+
+func TestGoroutineSafe(t *testing.T) {
+	log.WithDefaultFields(log.Fields{
+		"app_id": "santa",
+		"env":    "dev",
+	})
+
+	logger := log.WithFields(log.Fields{
+		"request_id": "abc",
+	})
+
+	// logger1 := logger.WithFields(log.Fields{
+	// 	"request_id_1": "abc",
+	// })
+
+	var wg sync.WaitGroup
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		logger.WithFields(log.Fields{
+			"name": "xyz",
+		})
+	}()
+	go func() {
+		defer wg.Done()
+		logger.WithFields(log.Fields{
+			"name": "abc",
+		})
+	}()
+	wg.Wait()
 
 }
