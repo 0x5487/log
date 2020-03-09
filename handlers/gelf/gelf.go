@@ -70,6 +70,9 @@ func (g *Gelf) Log(e log.Entry) error {
 
 // Flush all buffer data and close connection
 func (g *Gelf) Flush() error {
+	g.mutex.Lock()
+	defer g.mutex.Unlock()
+
 	_ = g.bufferedWriter.Flush()
 	return g.close()
 }
