@@ -99,10 +99,16 @@ func (g *Gelf) manageConnections() {
 			if g.conn == nil {
 				// TODO: tcp is hard-code at the point, we need to remove that later
 				newConn, err := net.Dial("tcp", g.url.Host)
-				if err == nil {
-					g.conn = newConn
-					stdlog.Println("created new connection")
+				if err != nil {
+					stdlog.Printf("gelf: create connection failed: %v", err)
+					continue
 				}
+
+				g.mutex.Lock()
+				g.conn = newConn
+				g.bufferedWriter = bufio.NewWriter(g.conn)
+				g.mutex.Unlock()
+				stdlog.Println("gelf: created a connection")
 			}
 			time.Sleep(1 * time.Second)
 		}
