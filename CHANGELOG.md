@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## [1.0.3]
+## [1.0.3] 2020-03-13
 - use slice fields to improve performance
 - use write buffer in gelf handler to improve performance
 - use cacheLeveledHandler to improve performance (reduce map loop up)
