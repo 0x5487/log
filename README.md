@@ -1,4 +1,4 @@
-# log [![GoDoc][doc-img]][doc] [![Build][ci-img]][ci]
+# log [![GoDoc][doc-img]][doc] [![Build][ci-img]][ci] [![Coverage Status][cov-img]][cov]
 
 It is a simple structured logging package for Go. 
 ## Features
@@ -94,14 +94,10 @@ PASS
 ok      github.com/jasonsoft/log        4.604s
 ```
 
-## Code Coverage
-coverage: 64.9% of statements
-
-```shell
-go test -coverprofile=c.out && go tool cover -html=c.out
-```
 
 [doc-img]: https://godoc.org/github.com/jasonsoft/log?status.svg
 [doc]: https://pkg.go.dev/github.com/jasonsoft/log?tab=doc
 [ci-img]: https://github.com/jasonsoft/log/workflows/build/badge.svg
 [ci]: https://github.com/jasonsoft/log/actions
+[cov-img]: https://codecov.io/gh/jasonsoft/log/branch/master/graph/badge.svg
+[cov]: https://codecov.io/gh/jasonsoft/log

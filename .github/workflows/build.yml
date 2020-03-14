@@ -31,4 +31,10 @@ jobs:
         uses: actions/checkout@v1
 
       - name: Test Go code
-        run: go test -race .
+        run: go test -race -coverprofile=c.out  && go tool cover -html=cover.out
+
+      - name: Upload coverage report to CodeCov
+        uses: codecov/codecov-action@v1.0.0
+        with:
+          token: ${{secrets.CODECOV_TOKEN}}
+          file: ./cover.out
