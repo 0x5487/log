@@ -13,9 +13,10 @@ import (
 
 func TestNoHandler(t *testing.T) {
 	log.Info("no handler 1")
+	log.Warnf("no handler 2")
 
 	logger := log.FromContext(context.Background())
-	logger.Info("no handler 2")
+	logger.Infof("no handler 3")
 }
 
 func TestPrintf(t *testing.T) {
