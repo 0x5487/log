@@ -38,6 +38,9 @@ func New(connectionString string) *Gelf {
 var empty byte
 
 func (g *Gelf) close() error {
+	g.mutex.Lock()
+	defer g.mutex.Unlock()
+
 	if g.conn != nil {
 		_ = g.conn.Close()
 		g.conn = nil
@@ -71,9 +74,9 @@ func (g *Gelf) Log(e log.Entry) error {
 // Flush all buffer data and close connection
 func (g *Gelf) Flush() error {
 	g.mutex.Lock()
-	defer g.mutex.Unlock()
-
 	_ = g.bufferedWriter.Flush()
+	g.mutex.Unlock()
+
 	return g.close()
 }
 
@@ -96,6 +99,7 @@ func (g *Gelf) manageConnections() {
 	// check connection status every 1 second
 	go func() {
 		for {
+			g.mutex.Lock()
 			if g.conn == nil {
 				// TODO: tcp is hard-code at the point, we need to remove that later
 				newConn, err := net.Dial("tcp", g.url.Host)
@@ -103,14 +107,12 @@ func (g *Gelf) manageConnections() {
 					stdlog.Printf("gelf: create connection failed: %v", err)
 					continue
 				}
-
-				g.mutex.Lock()
 				g.conn = newConn
 				g.bufferedWriter = bufio.NewWriter(g.conn)
-				g.mutex.Unlock()
 				stdlog.Println("gelf: created a connection")
 			}
-			time.Sleep(1 * time.Second)
+			g.mutex.Unlock()
+			time.Sleep(10 * time.Second)
 		}
 	}()
 }
