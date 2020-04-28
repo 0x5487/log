@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## [1.0.4] 
+- fix gelf handler race condition issue
+
 ## [1.0.3] 2020-03-13
 - use slice fields to improve performance
 - use write buffer in gelf handler to improve performance
