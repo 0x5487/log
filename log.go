@@ -153,6 +153,90 @@ func Fatalf(msg string, v ...interface{}) {
 	e.Fatalf(msg, v...)
 }
 
+// Str add string field to current entry
+func Str(key string, val string) Entry {
+	e := newEntry(_logger)
+	return e.Str(key, val)
+}
+
+// Bool add bool field to current entry
+func Bool(key string, val bool) Entry {
+	e := newEntry(_logger)
+	return e.Bool(key, val)
+}
+
+// Int add Int field to current entry
+func Int(key string, val int) Entry {
+	e := newEntry(_logger)
+	return e.Int(key, val)
+}
+
+// Int8 add Int8 field to current entry
+func Int8(key string, val int8) Entry {
+	e := newEntry(_logger)
+	return e.Int8(key, val)
+}
+
+// Int16 add Int16 field to current entry
+func Int16(key string, val int16) Entry {
+	e := newEntry(_logger)
+	return e.Int16(key, val)
+}
+
+// Int32 add Int32 field to current entry
+func Int32(key string, val int32) Entry {
+	e := newEntry(_logger)
+	return e.Int32(key, val)
+}
+
+// Int64 add Int64 field to current entry
+func Int64(key string, val int64) Entry {
+	e := newEntry(_logger)
+	return e.Int64(key, val)
+}
+
+// Uint add Uint field to current entry
+func Uint(key string, val uint) Entry {
+	e := newEntry(_logger)
+	return e.Uint(key, val)
+}
+
+// Uint8 add Uint8 field to current entry
+func Uint8(key string, val uint8) Entry {
+	e := newEntry(_logger)
+	return e.Uint8(key, val)
+}
+
+// Uint16 add Uint16 field to current entry
+func Uint16(key string, val uint16) Entry {
+	e := newEntry(_logger)
+	return e.Uint16(key, val)
+}
+
+// Uint32 add Uint32 field to current entry
+func Uint32(key string, val uint32) Entry {
+	e := newEntry(_logger)
+	return e.Uint32(key, val)
+}
+
+// Uint64 add Uint64 field to current entry
+func Uint64(key string, val uint64) Entry {
+	e := newEntry(_logger)
+	return e.Uint64(key, val)
+}
+
+// Float32 add float32 field to current entry
+func Float32(key string, val float32) Entry {
+	e := newEntry(_logger)
+	return e.Float32(key, val)
+}
+
+// Float64 add Float64 field to current entry
+func Float64(key string, val float64) Entry {
+	e := newEntry(_logger)
+	return e.Float64(key, val)
+}
+
 // Flush clear all handler's buffer
 func Flush() {
 	for _, h := range _logger.handles {

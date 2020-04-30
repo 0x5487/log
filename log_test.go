@@ -119,6 +119,51 @@ func TestWithFields(t *testing.T) {
 	assert.Equal(t, log.Fields{"file": "sloth.png"}, e.Fields)
 }
 
+func TestFields(t *testing.T) {
+	h := memory.New()
+	log.RegisterHandler(h, log.GetLevelsFromMinLevel("debug")...)
+
+	logger := log.
+		Str("hello", "world").
+		Bool("is_enabled", true).
+		Int("int", 8).
+		Int8("int8", int8(1)).
+		Int16("int16", int16(1)).
+		Int32("int32", int32(1)).
+		Int64("int64", int64(1)).
+		Uint("uint", uint(1)).
+		Uint8("uint8", uint8(1)).
+		Uint16("uint16", uint16(1)).
+		Uint32("uint32", uint32(1)).
+		Uint64("uint64", uint64(1)).
+		Float32("float32", float32(32.123)).
+		Float64("float64", float64(64.123))
+
+	logger.Debug("done")
+	assert.Equal(t, 1, len(h.Entries))
+
+	e := h.Entries[0]
+	assert.Equal(t, log.Fields{
+		"float32":    float32(32.123),
+		"float64":    float64(64.123),
+		"hello":      "world",
+		"int":        8,
+		"int8":       int8(1),
+		"int16":      int16(1),
+		"int32":      int32(1),
+		"int64":      int64(1),
+		"is_enabled": true,
+		"uint":       uint(1),
+		"uint8":      uint8(1),
+		"uint16":     uint16(1),
+		"uint32":     uint32(1),
+		"uint64":     uint64(1)},
+		e.Fields)
+
+	log.Flush()
+	assert.Equal(t, 0, len(h.Entries))
+}
+
 func TestWithField(t *testing.T) {
 	h := memory.New()
 	log.RegisterHandler(h, log.AllLevels...)

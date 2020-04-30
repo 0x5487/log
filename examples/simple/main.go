@@ -30,10 +30,7 @@ func main() {
 	log.Debug("hello world")
 
 	// log information with custom fileds
-	fields := log.Fields{
-		"city": "keelung",
-	}
-	log.WithFields(fields).Infof("more info")
+	log.Str("city", "keelung").Infof("more info")
 
 	// log error struct and print error message
 	err := errors.New("something bad happened")

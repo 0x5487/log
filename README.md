@@ -61,10 +61,7 @@ func main() {
 	log.Debug("hello world")
 
 	// log information with custom fileds
-	fields := log.Fields{
-		"city": "keelung",
-	}
-	log.WithFields(fields).Infof("more info")
+	log.Str("city", "keelung").Infof("more info")
 
 	// log error struct and print error message
 	err := errors.New("something bad happened")
@@ -75,6 +72,15 @@ Output
 
 ![](colored.png)
 
+## Field Types
+
+### Standard Types
+
+* `Str`
+* `Bool`
+* `Int`, `Int8`, `Int16`, `Int32`, `Int64`
+* `Uint`, `Uint8`, `Uint16`, `Uint32`, `Uint64`
+* `Float32`, `Float64`
 
 
 ## Benchmarks

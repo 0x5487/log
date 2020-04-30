@@ -135,6 +135,76 @@ func (e Entry) Fatalf(msg string, v ...interface{}) {
 	os.Exit(1)
 }
 
+// Str add string field to current entry
+func (e Entry) Str(key string, val string) Entry {
+	return e.WithFields(Fields{key: val})
+}
+
+// Bool add bool field to current entry
+func (e Entry) Bool(key string, val bool) Entry {
+	return e.WithFields(Fields{key: val})
+}
+
+// Int add Int field to current entry
+func (e Entry) Int(key string, val int) Entry {
+	return e.WithFields(Fields{key: val})
+}
+
+// Int8 add Int8 field to current entry
+func (e Entry) Int8(key string, val int8) Entry {
+	return e.WithFields(Fields{key: val})
+}
+
+// Int16 add Int16 field to current entry
+func (e Entry) Int16(key string, val int16) Entry {
+	return e.WithFields(Fields{key: val})
+}
+
+// Int32 add Int32 field to current entry
+func (e Entry) Int32(key string, val int32) Entry {
+	return e.WithFields(Fields{key: val})
+}
+
+// Int64 add Int64 field to current entry
+func (e Entry) Int64(key string, val int64) Entry {
+	return e.WithFields(Fields{key: val})
+}
+
+// Uint add Uint field to current entry
+func (e Entry) Uint(key string, val uint) Entry {
+	return e.WithFields(Fields{key: val})
+}
+
+// Uint8 add Uint8 field to current entry
+func (e Entry) Uint8(key string, val uint8) Entry {
+	return e.WithFields(Fields{key: val})
+}
+
+// Uint16 add Uint16 field to current entry
+func (e Entry) Uint16(key string, val uint16) Entry {
+	return e.WithFields(Fields{key: val})
+}
+
+// Uint32 add Uint32 field to current entry
+func (e Entry) Uint32(key string, val uint32) Entry {
+	return e.WithFields(Fields{key: val})
+}
+
+// Uint64 add Uint64 field to current entry
+func (e Entry) Uint64(key string, val uint64) Entry {
+	return e.WithFields(Fields{key: val})
+}
+
+// Float32 add Float32 field to current entry
+func (e Entry) Float32(key string, val float32) Entry {
+	return e.WithFields(Fields{key: val})
+}
+
+// Float64 add Float64 field to current entry
+func (e Entry) Float64(key string, val float64) Entry {
+	return e.WithFields(Fields{key: val})
+}
+
 // WithField returns a new entry with the `key` and `value` set.
 func (e Entry) WithField(key string, value interface{}) Entry {
 	return e.WithFields(Fields{key: value})
