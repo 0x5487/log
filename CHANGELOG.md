@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## [1.0.4] 
+## [1.0.4] 2020-04-30
 - fix gelf handler race condition issue
 - add standard field type
 
