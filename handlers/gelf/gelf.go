@@ -2,7 +2,6 @@ package gelf
 
 import (
 	"bufio"
-	"encoding/json"
 	"fmt"
 	stdlog "log"
 	"net"
@@ -48,10 +47,20 @@ func (g *Gelf) close() error {
 	return nil
 }
 
-// Log handles the log entry
-func (g *Gelf) Log(e log.Entry) error {
+// Hook handles the log entry
+func (g *Gelf) Hook(e *log.Entry) error {
+	e.Str("version", "1.1").
+		Uint8("level", toGelfLevel(e.Level)).
+		Str("short_message", e.Message)
+
+	return nil
+	//items["timestamp"] = float64(time.Now().UTC().UnixNano()) / float64(time.Second)
+}
+
+// Write handles the log entry
+func (g *Gelf) Write(e *log.Entry) error {
 	if g.conn != nil {
-		payload := entryToPayload(e)
+		payload := e.Buffer()
 		payload = append(payload, empty) // when we use tcp, we need to add null byte in the end.
 		g.mutex.Lock()
 		_, err := g.bufferedWriter.Write(payload)
@@ -115,27 +124,6 @@ func (g *Gelf) manageConnections() {
 			time.Sleep(10 * time.Second)
 		}
 	}()
-}
-
-func entryToPayload(e log.Entry) []byte {
-	items := make(map[string]interface{})
-	items["version"] = "1.1"
-	items["level"] = toGelfLevel(e.Level)
-	items["short_message"] = e.Message
-	items["full_message"] = e.Message
-	items["timestamp"] = float64(e.Timestamp.UnixNano()) / float64(time.Second)
-
-	for key, value := range e.Fields {
-		switch key {
-		case "short_message", "host":
-			items[key] = value
-		default:
-			items["_"+key] = value
-		}
-	}
-
-	payload, _ := json.Marshal(items)
-	return payload
 }
 
 func toGelfLevel(level log.Level) uint8 {

@@ -13,6 +13,7 @@ const (
 	ErrorLevel
 	PanicLevel
 	FatalLevel
+	TraceLevel
 )
 
 // AllLevels is an array of all log levels, for easier registering of all levels to a handler
@@ -23,6 +24,7 @@ var AllLevels = []Level{
 	ErrorLevel,
 	PanicLevel,
 	FatalLevel,
+	TraceLevel,
 }
 
 var levelNames = []string{
@@ -32,6 +34,7 @@ var levelNames = []string{
 	"ERROR",
 	"PANIC",
 	"FATAL",
+	"TRACE",
 }
 
 // String returns the string representation of a logging level.

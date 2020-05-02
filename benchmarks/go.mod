@@ -5,7 +5,7 @@ go 1.13
 replace github.com/jasonsoft/log => ../
 
 require (
-	github.com/apex/log v1.1.1
+	github.com/apex/log v1.1.4
 	github.com/go-kit/kit v0.9.0
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/jasonsoft/log v1.0.1

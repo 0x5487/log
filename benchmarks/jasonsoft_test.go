@@ -21,70 +21,19 @@
 package benchmarks
 
 import (
-	"fmt"
-	"testing"
-
 	"github.com/jasonsoft/log"
-	"github.com/jasonsoft/log/handlers/discard"
 )
 
-func fakeJasonSoftFields() log.Fields {
-	return log.Fields{
-		"int":     _tenInts[0],
-		"ints":    _tenInts,
-		"string":  _tenStrings[0],
-		"strings": _tenStrings,
-		"time":    _tenTimes[0],
-		"times":   _tenTimes,
-		"user1":   _oneUser,
-		"user2":   _oneUser,
-		"users":   _tenUsers,
-		"error":   errExample,
-	}
-}
-
-func BenchmarkSmall(b *testing.B) {
-	h := discard.New()
-	log.RegisterHandler(h, log.InfoLevel)
-
-	for i := 0; i < b.N; i++ {
-		log.Info("login")
-	}
-}
-
-func BenchmarkMedium(b *testing.B) {
-	h := discard.New()
-	log.RegisterHandler(h, log.InfoLevel)
-
-	for i := 0; i < b.N; i++ {
-		log.WithFields(log.Fields{
-			"file": "sloth.png",
-			"type": "image/png",
-			"size": 1 << 20,
-		}).Info("upload")
-	}
-}
-
-func BenchmarkLarge(b *testing.B) {
-	h := discard.New()
-	log.RegisterHandler(h, log.InfoLevel)
-
-	err := fmt.Errorf("boom")
-
-	for i := 0; i < b.N; i++ {
-		log.WithFields(log.Fields{
-			"file": "sloth.png",
-			"type": "image/png",
-			"size": 1 << 20,
-		}).
-			WithFields(log.Fields{
-				"some":     "more",
-				"data":     "here",
-				"whatever": "blah blah",
-				"more":     "stuff",
-				"context":  "such useful",
-				"much":     "fun",
-			}).
-			WithError(err).Error("upload failed")
-	}
+func fakeJasonLogFields() log.Context {
+	return log.
+		Int("int", _tenInts[0]).
+		Ints("ints", _tenInts).
+		Str("string", _tenStrings[0]).
+		Strs("strings", _tenStrings).
+		Time("time", _tenTimes[0]).
+		Times("times", _tenTimes).
+		Interface("user1", _oneUser).
+		Interface("user2", _oneUser).
+		Interface("users", _tenUsers).
+		Err(errExample)
 }

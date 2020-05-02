@@ -115,7 +115,7 @@ func BenchmarkDisabledAccumulatedContext(b *testing.B) {
 	b.Run("jasnosoft/log", func(b *testing.B) {
 		h := jasonDiscard.New()
 		jasonLog.RegisterHandler(h, jasonLog.ErrorLevel)
-		logger := jasonLog.WithFields(fakeJasonSoftFields())
+		logger := fakeJasonLogFields()
 		b.ResetTimer()
 		b.RunParallel(func(pb *testing.PB) {
 			for pb.Next() {
@@ -201,7 +201,7 @@ func BenchmarkDisabledAddingFields(b *testing.B) {
 		b.ResetTimer()
 		b.RunParallel(func(pb *testing.PB) {
 			for pb.Next() {
-				jasonLog.WithFields(fakeJasonSoftFields()).Info(getMessage(0))
+				fakeJasonLogFields().Info(getMessage(0))
 			}
 		})
 	})
@@ -424,7 +424,7 @@ func BenchmarkAccumulatedContext(b *testing.B) {
 	b.Run("jasnosoft/log", func(b *testing.B) {
 		h := jasonDiscard.New()
 		jasonLog.RegisterHandler(h, jasonLog.InfoLevel)
-		logger := jasonLog.WithFields(fakeJasonSoftFields())
+		logger := fakeJasonLogFields()
 		b.ResetTimer()
 		b.RunParallel(func(pb *testing.PB) {
 			for pb.Next() {
@@ -561,7 +561,7 @@ func BenchmarkAddingFields(b *testing.B) {
 		b.ResetTimer()
 		b.RunParallel(func(pb *testing.PB) {
 			for pb.Next() {
-				jasonLog.WithFields(fakeJasonSoftFields()).Info(getMessage(0))
+				fakeJasonLogFields().Info(getMessage(0))
 			}
 		})
 	})
@@ -624,7 +624,7 @@ func BenchmarkAddingFields(b *testing.B) {
 		b.ResetTimer()
 		b.RunParallel(func(pb *testing.PB) {
 			for pb.Next() {
-				jasonLog.WithFields(fakeJasonSoftFields()).Info(getMessage(0))
+				fakeJasonLogFields().Info(getMessage(0))
 			}
 		})
 	})

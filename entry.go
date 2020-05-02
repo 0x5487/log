@@ -4,123 +4,166 @@ import (
 	"fmt"
 	stdlog "log"
 	"os"
-	"sort"
 	"strings"
+	"sync"
 	"time"
+
+	"github.com/jasonsoft/log/internal/json"
 )
 
-// Fields represents a map of entry level data used for structured logging.
-type Fields map[string]interface{}
-
-// Names returns field names sorted.
-// map is not
-func (f Fields) Names() (v []string) {
-	for k := range f {
-		v = append(v, k)
-	}
-
-	sort.Strings(v)
-	return
+var entryPool = &sync.Pool{
+	New: func() interface{} {
+		return &Entry{
+			buf: make([]byte, 0, 500),
+		}
+	},
 }
 
-// Get field value by name.
-func (f Fields) Get(name string) interface{} {
-	return f[name]
-}
+var enc = json.Encoder{}
 
 // Entry defines a single log entry
 type Entry struct {
 	logger *logger
 	start  time.Time
-	fields []Fields // private used; store all fields when withFields is called.  improve performance.
+	buf    []byte
 
-	Level     Level     `json:"level"`
-	Message   string    `json:"message"`
-	Timestamp time.Time `json:"timestamp"`
-	Fields    Fields    `json:"fields"` // single map; easy to use for handlers
+	Level   Level  `json:"level"`
+	Message string `json:"message"`
 }
 
-func newEntry(l *logger) Entry {
-	e := Entry{}
+func newEntry(l *logger, buf []byte) *Entry {
+	e := entryPool.Get().(*Entry)
 	e.logger = l
-	e.fields = l.defaultFields
+
+	if buf == nil {
+		e.buf = e.buf[:0]
+		e.buf = enc.AppendBeginMarker(e.buf)
+	} else {
+		e.buf = buf
+	}
+
 	return e
 }
 
+func putEntry(e *Entry) {
+	// Proper usage of a sync.Pool requires each entry to have approximately
+	// the same memory cost. To obtain this property when the stored type
+	// contains a variably-sized buffer, we add a hard limit on the maximum buffer
+	// to place back in the pool.
+	//
+	// See https://golang.org/issue/23199
+	const maxSize = 1 << 16 // 64KiB
+	if cap(e.buf) > maxSize {
+		return
+	}
+	entryPool.Put(e)
+}
+
+func copyEntry(e *Entry) *Entry {
+	newEntry := entryPool.Get().(*Entry)
+	newEntry.buf = newEntry.buf[:0]
+	newEntry.buf = e.buf
+	newEntry.logger = e.logger
+	newEntry.start = e.start
+	newEntry.Level = e.Level
+	newEntry.Message = e.Message
+	return newEntry
+}
+
+func (e *Entry) Buffer() []byte {
+	return e.buf
+}
+
+// Trace returns a new entry with a Stop method to fire off
+// a corresponding completion log, useful with defer.
+func (e *Entry) Trace(msg string) *Entry {
+	e.Level = TraceLevel
+	e.Message = msg
+	e.start = time.Now().UTC()
+	return e
+}
+
+// Stop should be used with Trace, to fire off the completion message. When
+// an `err` is passed the "error" field is set, and the log level is error.
+func (e *Entry) Stop() {
+	e = e.Str("duration", duration(time.Since(e.start)))
+	handler(e)
+}
+
 // Debug level message.
-func (e Entry) Debug(msg string) {
+func (e *Entry) Debug(msg string) {
 	e.Level = DebugLevel
 	e.Message = msg
 	handler(e)
 }
 
 // Debugf level message.
-func (e Entry) Debugf(msg string, v ...interface{}) {
+func (e *Entry) Debugf(msg string, v ...interface{}) {
 	e.Level = DebugLevel
 	e.Message = fmt.Sprintf(msg, v...)
 	handler(e)
 }
 
 // Info level message.
-func (e Entry) Info(msg string) {
+func (e *Entry) Info(msg string) {
 	e.Level = InfoLevel
 	e.Message = msg
 	handler(e)
 }
 
 // Infof level message.
-func (e Entry) Infof(msg string, v ...interface{}) {
+func (e *Entry) Infof(msg string, v ...interface{}) {
 	e.Level = InfoLevel
 	e.Message = fmt.Sprintf(msg, v...)
 	handler(e)
 }
 
 // Warn level message.
-func (e Entry) Warn(msg string) {
+func (e *Entry) Warn(msg string) {
 	e.Level = WarnLevel
 	e.Message = msg
 	handler(e)
 }
 
 // Warnf level message.
-func (e Entry) Warnf(msg string, v ...interface{}) {
+func (e *Entry) Warnf(msg string, v ...interface{}) {
 	e.Level = WarnLevel
 	e.Message = fmt.Sprintf(msg, v...)
 	handler(e)
 }
 
 // Error level message.
-func (e Entry) Error(msg string) {
+func (e *Entry) Error(msg string) {
 	e.Level = ErrorLevel
 	e.Message = msg
 	handler(e)
 }
 
 // Errorf level message.
-func (e Entry) Errorf(msg string, v ...interface{}) {
+func (e *Entry) Errorf(msg string, v ...interface{}) {
 	e.Level = ErrorLevel
 	e.Message = fmt.Sprintf(msg, v...)
 	handler(e)
 }
 
 // Panic level message.
-func (e Entry) Panic(msg string) {
+func (e *Entry) Panic(msg string) {
 	e.Level = PanicLevel
 	e.Message = msg
 	handler(e)
-	os.Exit(1)
+	panic(msg)
 }
 
 // Panicf level message.
-func (e Entry) Panicf(msg string, v ...interface{}) {
+func (e *Entry) Panicf(msg string, v ...interface{}) {
 	e.Level = PanicLevel
 	e.Message = fmt.Sprintf(msg, v...)
 	handler(e)
-	os.Exit(1)
+	panic(msg)
 }
 
 // Fatal level message.
-func (e Entry) Fatal(msg string) {
+func (e *Entry) Fatal(msg string) {
 	e.Level = FatalLevel
 	e.Message = msg
 	handler(e)
@@ -128,7 +171,7 @@ func (e Entry) Fatal(msg string) {
 }
 
 // Fatalf level message.
-func (e Entry) Fatalf(msg string, v ...interface{}) {
+func (e *Entry) Fatalf(msg string, v ...interface{}) {
 	e.Level = FatalLevel
 	e.Message = fmt.Sprintf(msg, v...)
 	handler(e)
@@ -136,117 +179,193 @@ func (e Entry) Fatalf(msg string, v ...interface{}) {
 }
 
 // Str add string field to current entry
-func (e Entry) Str(key string, val string) Entry {
-	return e.WithFields(Fields{key: val})
+func (e *Entry) Str(key string, val string) *Entry {
+	if e == nil {
+		return e
+	}
+	e.buf = enc.AppendKey(e.buf, key)
+	e.buf = enc.AppendString(e.buf, val)
+	return e
+}
+
+// Strs add string field to current entry
+func (e *Entry) Strs(key string, val []string) *Entry {
+	if e == nil {
+		return e
+	}
+	e.buf = enc.AppendKey(e.buf, key)
+	e.buf = enc.AppendStrings(e.buf, val)
+	return e
 }
 
 // Bool add bool field to current entry
-func (e Entry) Bool(key string, val bool) Entry {
-	return e.WithFields(Fields{key: val})
+func (e *Entry) Bool(key string, val bool) *Entry {
+	if e == nil {
+		return e
+	}
+	e.buf = enc.AppendKey(e.buf, key)
+	e.buf = enc.AppendBool(e.buf, val)
+	return e
 }
 
-// Int add Int field to current entry
-func (e Entry) Int(key string, val int) Entry {
-	return e.WithFields(Fields{key: val})
+// Int adds Int field to current entry
+func (e *Entry) Int(key string, val int) *Entry {
+	if e == nil {
+		return e
+	}
+	e.buf = enc.AppendKey(e.buf, key)
+	e.buf = enc.AppendInt(e.buf, val)
+	return e
+}
+
+// Ints adds Int field to current entry
+func (e *Entry) Ints(key string, val []int) *Entry {
+	if e == nil {
+		return e
+	}
+	e.buf = enc.AppendKey(e.buf, key)
+	e.buf = enc.AppendInts(e.buf, val)
+	return e
 }
 
 // Int8 add Int8 field to current entry
-func (e Entry) Int8(key string, val int8) Entry {
-	return e.WithFields(Fields{key: val})
+func (e *Entry) Int8(key string, val int8) *Entry {
+	if e == nil {
+		return e
+	}
+	e.buf = enc.AppendKey(e.buf, key)
+	e.buf = enc.AppendInt8(e.buf, val)
+	return e
 }
 
 // Int16 add Int16 field to current entry
-func (e Entry) Int16(key string, val int16) Entry {
-	return e.WithFields(Fields{key: val})
+func (e *Entry) Int16(key string, val int16) *Entry {
+	if e == nil {
+		return e
+	}
+	e.buf = enc.AppendKey(e.buf, key)
+	e.buf = enc.AppendInt16(e.buf, val)
+	return e
 }
 
-// Int32 add Int32 field to current entry
-func (e Entry) Int32(key string, val int32) Entry {
-	return e.WithFields(Fields{key: val})
+// Int32 adds Int32 field to current entry
+func (e *Entry) Int32(key string, val int32) *Entry {
+	if e == nil {
+		return e
+	}
+	e.buf = enc.AppendKey(e.buf, key)
+	e.buf = enc.AppendInt32(e.buf, val)
+	return e
 }
 
 // Int64 add Int64 field to current entry
-func (e Entry) Int64(key string, val int64) Entry {
-	return e.WithFields(Fields{key: val})
+func (e *Entry) Int64(key string, val int64) *Entry {
+	if e == nil {
+		return e
+	}
+	e.buf = enc.AppendKey(e.buf, key)
+	e.buf = enc.AppendInt64(e.buf, val)
+	return e
 }
 
 // Uint add Uint field to current entry
-func (e Entry) Uint(key string, val uint) Entry {
-	return e.WithFields(Fields{key: val})
+func (e *Entry) Uint(key string, val uint) *Entry {
+	if e == nil {
+		return e
+	}
+	e.buf = enc.AppendKey(e.buf, key)
+	e.buf = enc.AppendUint(e.buf, val)
+	return e
 }
 
 // Uint8 add Uint8 field to current entry
-func (e Entry) Uint8(key string, val uint8) Entry {
-	return e.WithFields(Fields{key: val})
+func (e *Entry) Uint8(key string, val uint8) *Entry {
+	if e == nil {
+		return e
+	}
+	e.buf = enc.AppendKey(e.buf, key)
+	e.buf = enc.AppendUint8(e.buf, val)
+	return e
 }
 
 // Uint16 add Uint16 field to current entry
-func (e Entry) Uint16(key string, val uint16) Entry {
-	return e.WithFields(Fields{key: val})
+func (e *Entry) Uint16(key string, val uint16) *Entry {
+	if e == nil {
+		return e
+	}
+	e.buf = enc.AppendKey(e.buf, key)
+	e.buf = enc.AppendUint16(e.buf, val)
+	return e
 }
 
 // Uint32 add Uint32 field to current entry
-func (e Entry) Uint32(key string, val uint32) Entry {
-	return e.WithFields(Fields{key: val})
+func (e *Entry) Uint32(key string, val uint32) *Entry {
+	if e == nil {
+		return e
+	}
+	e.buf = enc.AppendKey(e.buf, key)
+	e.buf = enc.AppendUint32(e.buf, val)
+	return e
 }
 
 // Uint64 add Uint64 field to current entry
-func (e Entry) Uint64(key string, val uint64) Entry {
-	return e.WithFields(Fields{key: val})
+func (e *Entry) Uint64(key string, val uint64) *Entry {
+	if e == nil {
+		return e
+	}
+	e.buf = enc.AppendKey(e.buf, key)
+	e.buf = enc.AppendUint64(e.buf, val)
+	return e
 }
 
 // Float32 add Float32 field to current entry
-func (e Entry) Float32(key string, val float32) Entry {
-	return e.WithFields(Fields{key: val})
-}
-
-// Float64 add Float64 field to current entry
-func (e Entry) Float64(key string, val float64) Entry {
-	return e.WithFields(Fields{key: val})
-}
-
-// WithField returns a new entry with the `key` and `value` set.
-func (e Entry) WithField(key string, value interface{}) Entry {
-	return e.WithFields(Fields{key: value})
-}
-
-// WithFields adds the provided fields to the current entry
-func (e Entry) WithFields(fields Fields) Entry {
-	f := make([]Fields, 0, len(e.fields)+len(fields))
-	f = append(f, e.fields...)
-	f = append(f, fields)
-
-	e.fields = f
-	return e
-}
-
-// WithError returns a new entry with the "error" set to `err`.
-func (e Entry) WithError(err error) Entry {
-	if err == nil {
+func (e *Entry) Float32(key string, val float32) *Entry {
+	if e == nil {
 		return e
 	}
-	return e.WithField("error", fmt.Sprintf("%+v", err))
-}
-
-// Trace returns a new entry with a Stop method to fire off
-// a corresponding completion log, useful with defer.
-func (e Entry) Trace(msg string) Entry {
-	e.Message = msg
-	e.start = time.Now().UTC()
+	e.buf = enc.AppendKey(e.buf, key)
+	e.buf = enc.AppendFloat32(e.buf, val)
 	return e
 }
 
-// mergedFields returns the fields list collapsed into a single map.
-func (e Entry) mergedFields() Fields {
-	f := Fields{}
-
-	for _, fields := range e.fields {
-		for k, v := range fields {
-			f[k] = v
-		}
+// Float64 adds Float64 field to current entry
+func (e *Entry) Float64(key string, val float64) *Entry {
+	if e == nil {
+		return e
 	}
+	e.buf = enc.AppendKey(e.buf, key)
+	e.buf = enc.AppendFloat64(e.buf, val)
+	return e
+}
 
-	return f
+// Time adds Time field to current entry
+func (e *Entry) Time(key string, val time.Time) *Entry {
+	if e == nil {
+		return e
+	}
+	e.buf = enc.AppendKey(e.buf, key)
+	e.buf = enc.AppendTime(e.buf, val, time.RFC3339)
+	return e
+}
+
+// Times adds Time field to current entry
+func (e *Entry) Times(key string, val []time.Time) *Entry {
+	if e == nil {
+		return e
+	}
+	e.buf = enc.AppendKey(e.buf, key)
+	e.buf = enc.AppendTimes(e.buf, val, time.RFC3339)
+	return e
+}
+
+// Interface adds the field key with i marshaled using reflection.
+func (e *Entry) Interface(key string, val interface{}) *Entry {
+	if e == nil {
+		return e
+	}
+	e.buf = enc.AppendKey(e.buf, key)
+	e.buf = enc.AppendInterface(e.buf, val)
+	return e
 }
 
 const (
@@ -274,23 +393,55 @@ func duration(d time.Duration) string {
 	return b.String()
 }
 
-// Stop should be used with Trace, to fire off the completion message. When
-// an `err` is passed the "error" field is set, and the log level is error.
-func (e Entry) Stop() {
-	e.WithField("duration", duration(time.Since(e.start))).Info(e.Message)
-}
+func handler(e *Entry) {
 
-func handler(e Entry) {
-	// I guess we don't need to lock here and the performance can be improved
-	// e.logger.rwMutex.RLock()
-	// defer e.logger.rwMutex.RUnlock()
+	handlers := e.logger.cacheLeveledHandlers(e.Level)
 
-	for _, h := range e.logger.cacheLeveledHandlers(e.Level) {
-		e.Timestamp = time.Now().UTC()
-		e.Fields = e.mergedFields()
-		err := h.Log(e)
+	if len(handlers) == 1 {
+		h := handlers[0]
+		err := h.Hook(e)
 		if err != nil {
-			stdlog.Printf("log: log failed: %v", err)
+			stdlog.Printf("log: log hook failed: %v", err)
+		}
+
+		if len(e.Message) > 0 {
+			e.buf = enc.AppendKey(e.buf, "msg")
+			e.buf = enc.AppendString(e.buf, e.Message)
+		}
+
+		e.buf = enc.AppendEndMarker(e.buf)
+		e.buf = enc.AppendLineBreak(e.buf)
+
+		err = h.Write(e)
+		if err != nil {
+			stdlog.Printf("log: log write failed: %v", err)
 		}
 	}
+
+	// if len(handlers) > 1 {
+	// 	for _, h := range handlers {
+	// 		newEntry := copyEntry(e)
+
+	// 		err := h.Hook(newEntry)
+	// 		if err != nil {
+	// 			stdlog.Printf("log: log hook failed: %v", err)
+	// 		}
+
+	// 		if len(newEntry.Message) > 0 {
+	// 			newEntry.buf = enc.AppendKey(newEntry.buf, "msg")
+	// 			newEntry.buf = enc.AppendString(newEntry.buf, newEntry.Message)
+	// 		}
+
+	// 		newEntry.buf = enc.AppendEndMarker(newEntry.buf)
+	// 		newEntry.buf = enc.AppendLineBreak(newEntry.buf)
+
+	// 		err = h.Write(newEntry)
+	// 		if err != nil {
+	// 			stdlog.Printf("log: log write failed: %v", err)
+	// 		}
+	// 		putEntry(newEntry)
+	// 	}
+	// }
+
+	putEntry(e)
 }

@@ -1,6 +1,7 @@
 package console
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"sync"
@@ -34,11 +35,23 @@ func New() *Console {
 	}
 }
 
-// Log handles the log entry
-func (h *Console) Log(e log.Entry) error {
+// Hook handles the log entry
+func (h *Console) Hook(e *log.Entry) error {
+	e.Str("level", e.Level.String())
+
+	return nil
+}
+
+// Write handles the log entry
+func (h *Console) Write(e *log.Entry) error {
 	color := colors[e.Level]
 	level := e.Level.String()
-	names := e.Fields.Names()
+
+	kv := map[string]interface{}{}
+	err := json.Unmarshal(e.Buffer(), &kv)
+	if err != nil {
+		return err
+	}
 
 	// fmt is not goroutine safe
 	// https://stackoverflow.com/questions/14694088/is-it-safe-for-more-than-one-goroutine-to-print-to-stdout
@@ -47,8 +60,11 @@ func (h *Console) Log(e log.Entry) error {
 
 	_, _ = color.Fprintf(h.writer, "%s %-50s", bold.Sprintf("%-8s", level), e.Message)
 
-	for _, name := range names {
-		fmt.Fprintf(h.writer, " %s=%v", color.Sprint(name), e.Fields.Get(name))
+	for k, v := range kv {
+		if k == "level" || k == "msg" {
+			continue
+		}
+		fmt.Fprintf(h.writer, " %s=%v", color.Sprint(k), fmt.Sprintf("%v", v))
 	}
 
 	fmt.Fprintln(h.writer)

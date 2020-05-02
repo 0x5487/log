@@ -10,29 +10,33 @@ import (
 
 // Handler implementation.
 type Handler struct {
-	mu      sync.Mutex
-	Entries []log.Entry
+	mu  sync.Mutex
+	Out []byte
 }
 
 // New handler.
 func New() *Handler {
-	return &Handler{}
+	return &Handler{
+		Out: make([]byte, 500),
+	}
 }
 
-// Log implements log.Handler.
-func (h *Handler) Log(e log.Entry) error {
-	h.mu.Lock()
-	defer h.mu.Unlock()
+// Hook implements log.Handler.
+func (h *Handler) Hook(e *log.Entry) error {
+	e.Str("level", e.Level.String())
 
-	h.Entries = append(h.Entries, e)
+	return nil
+}
+
+// Write implements log.Handler.
+func (h *Handler) Write(e *log.Entry) error {
+
+	h.Out = e.Buffer()
 	return nil
 }
 
 // Flush clear all buffer
 func (h *Handler) Flush() error {
-	h.mu.Lock()
-	defer h.mu.Unlock()
-
-	h.Entries = []log.Entry{}
+	h.Out = []byte{}
 	return nil
 }
