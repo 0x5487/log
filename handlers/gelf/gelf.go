@@ -22,7 +22,7 @@ type Gelf struct {
 }
 
 // New create a new Gelf instance
-func New(connectionString string) *Gelf {
+func New(connectionString string) log.Handler {
 	url, err := url.Parse(connectionString)
 	if err != nil {
 		panic(fmt.Errorf("graylog connectionString is wrong: %v", err))
@@ -53,6 +53,7 @@ func (g *Gelf) Hook(e *log.Entry) error {
 		Uint8("level", toGelfLevel(e.Level)).
 		Str("short_message", e.Message)
 
+	e.Message = ""
 	return nil
 	//items["timestamp"] = float64(time.Now().UTC().UnixNano()) / float64(time.Second)
 }

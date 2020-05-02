@@ -99,22 +99,6 @@ func TestContext(t *testing.T) {
 	assert.Equal(t, `{"app":"stant","c":"d","level":"INFO","msg":"hello world"}`+"\n", string(h.Out))
 }
 
-func BenchmarkDisabledAddingFields(b *testing.B) {
-	b.Logf("Logging without any structured context.")
-
-	b.Run("jasnosoft/log", func(b *testing.B) {
-		h := discard.New()
-		log.RegisterHandler(h, log.InfoLevel)
-		b.ResetTimer()
-		b.RunParallel(func(pb *testing.PB) {
-			for pb.Next() {
-				log.Info("hello world")
-			}
-		})
-	})
-
-}
-
 func TestFlush(t *testing.T) {
 	h := memory.New()
 	log.RegisterHandler(h, log.GetLevelsFromMinLevel("debug")...)
@@ -264,4 +248,20 @@ func TestGoroutineSafe(t *testing.T) {
 		logger.Str("name", "xyz")
 	}()
 	wg.Wait()
+}
+
+func BenchmarkDisabledAddingFields(b *testing.B) {
+	b.Logf("Logging without any structured context.")
+
+	b.Run("jasnosoft/log", func(b *testing.B) {
+		h := discard.New()
+		log.RegisterHandler(h, log.InfoLevel)
+		b.ResetTimer()
+		b.RunParallel(func(pb *testing.PB) {
+			for pb.Next() {
+				log.Info("hello world")
+			}
+		})
+	})
+
 }

@@ -62,6 +62,7 @@ func putEntry(e *Entry) {
 func copyEntry(e *Entry) *Entry {
 	newEntry := entryPool.Get().(*Entry)
 	newEntry.buf = newEntry.buf[:0]
+	//copy(newEntry.buf, e.buf)
 	newEntry.buf = e.buf
 	newEntry.logger = e.logger
 	newEntry.start = e.start
@@ -395,53 +396,29 @@ func duration(d time.Duration) string {
 
 func handler(e *Entry) {
 
-	handlers := e.logger.cacheLeveledHandlers(e.Level)
+	for _, h := range e.logger.cacheLeveledHandlers(e.Level) {
 
-	if len(handlers) == 1 {
-		h := handlers[0]
-		err := h.Hook(e)
+		newEntry := copyEntry(e)
+
+		err := h.Hook(newEntry)
 		if err != nil {
 			stdlog.Printf("log: log hook failed: %v", err)
 		}
 
-		if len(e.Message) > 0 {
-			e.buf = enc.AppendKey(e.buf, "msg")
-			e.buf = enc.AppendString(e.buf, e.Message)
+		if len(newEntry.Message) > 0 {
+			newEntry.buf = enc.AppendKey(newEntry.buf, "msg")
+			newEntry.buf = enc.AppendString(newEntry.buf, newEntry.Message)
 		}
 
-		e.buf = enc.AppendEndMarker(e.buf)
-		e.buf = enc.AppendLineBreak(e.buf)
+		newEntry.buf = enc.AppendEndMarker(newEntry.buf)
+		newEntry.buf = enc.AppendLineBreak(newEntry.buf)
 
-		err = h.Write(e)
+		err = h.Write(newEntry)
 		if err != nil {
 			stdlog.Printf("log: log write failed: %v", err)
 		}
+		putEntry(newEntry)
 	}
-
-	// if len(handlers) > 1 {
-	// 	for _, h := range handlers {
-	// 		newEntry := copyEntry(e)
-
-	// 		err := h.Hook(newEntry)
-	// 		if err != nil {
-	// 			stdlog.Printf("log: log hook failed: %v", err)
-	// 		}
-
-	// 		if len(newEntry.Message) > 0 {
-	// 			newEntry.buf = enc.AppendKey(newEntry.buf, "msg")
-	// 			newEntry.buf = enc.AppendString(newEntry.buf, newEntry.Message)
-	// 		}
-
-	// 		newEntry.buf = enc.AppendEndMarker(newEntry.buf)
-	// 		newEntry.buf = enc.AppendLineBreak(newEntry.buf)
-
-	// 		err = h.Write(newEntry)
-	// 		if err != nil {
-	// 			stdlog.Printf("log: log write failed: %v", err)
-	// 		}
-	// 		putEntry(newEntry)
-	// 	}
-	// }
 
 	putEntry(e)
 }

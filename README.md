@@ -2,11 +2,9 @@
 
 It is a simple structured logging package for Go. 
 ## Features
-* easy, configurable, and pretty logging for development
-* built-in some handlers
+* fast, easy to use, and pretty logging for development
 * allow to use different level for each handler
 * goroutine safety (thread-safe)
-* allow to add default fields to every log.  ( ex.  You maybe want to add `app_id` per each app or `env` per each environment)
 * colored text for console handler (`linux`, `mac`, and `windows` are supported)
 * `context.Context` integration
 
