@@ -59,12 +59,10 @@ func (g *Gelf) Hook(e *log.Entry) error {
 }
 
 // Write handles the log entry
-func (g *Gelf) Write(e *log.Entry) error {
+func (g *Gelf) Write(bytes []byte) error {
 	if g.conn != nil {
-		payload := e.Buffer()
-		payload = append(payload, empty) // when we use tcp, we need to add null byte in the end.
 		g.mutex.Lock()
-		_, err := g.bufferedWriter.Write(payload)
+		_, err := g.bufferedWriter.Write(append(bytes, empty)) // when we use tcp, we need to add null byte in the end.
 		g.mutex.Unlock()
 		if err != nil {
 			_ = g.close()

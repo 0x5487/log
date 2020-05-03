@@ -18,13 +18,17 @@ func main() {
 	// use trace to get how long it takes
 	//defer log.Trace("time to run").Stop()
 
+	logger := log.
+		Str("app_id", "santa").
+		Str("env", "dev")
+
 	// print message use DEBUG level
-	log.Debug("hello world")
+	logger.Debug("hello world")
 
 	// log information with custom fileds
-	log.Str("city", "keelung").Info("more info")
+	logger.Str("city", "keelung").Info("more info")
 
 	// log error struct and print error message
 	err := errors.New("something bad happened")
-	log.Err(err).Error("oops...")
+	logger.Err(err).Error("oops...")
 }

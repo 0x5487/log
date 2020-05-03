@@ -14,7 +14,7 @@ var (
 // Handler is an interface that log handlers need to be implemented
 type Handler interface {
 	Hook(*Entry) error
-	Write(*Entry) error
+	Write([]byte) error
 }
 
 // Flusher is an interface that allow handles have the ability to clear buffer and close connection

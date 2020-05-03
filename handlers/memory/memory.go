@@ -29,9 +29,8 @@ func (h *Handler) Hook(e *log.Entry) error {
 }
 
 // Write implements log.Handler.
-func (h *Handler) Write(e *log.Entry) error {
-
-	h.Out = e.Buffer()
+func (h *Handler) Write(bytes []byte) error {
+	h.Out = bytes
 	return nil
 }
 

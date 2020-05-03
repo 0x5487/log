@@ -424,7 +424,7 @@ func handler(e *Entry) {
 		newEntry.buf = enc.AppendEndMarker(newEntry.buf)
 		newEntry.buf = enc.AppendLineBreak(newEntry.buf)
 
-		err = h.Write(newEntry)
+		err = h.Write(newEntry.buf)
 		if err != nil {
 			stdlog.Printf("log: log write failed: %v", err)
 		}
@@ -484,7 +484,7 @@ func handlers(e *Entry) {
 		newEntry.buf = enc.AppendEndMarker(newEntry.buf)
 		newEntry.buf = enc.AppendLineBreak(newEntry.buf)
 
-		err = h.Write(newEntry)
+		err = h.Write(newEntry.buf)
 		if err != nil {
 			stdlog.Printf("log: log write failed: %v", err)
 		}
