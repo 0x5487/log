@@ -61,9 +61,18 @@ func putEntry(e *Entry) {
 
 func copyEntry(e *Entry) *Entry {
 	newEntry := entryPool.Get().(*Entry)
-	newEntry.buf = newEntry.buf[:0]
-	//copy(newEntry.buf, e.buf)
-	newEntry.buf = e.buf
+
+	if len(e.buf) > cap(newEntry.buf) {
+		// append will auto increase slice's capacity  when needed
+		newEntry.buf = e.buf[:0]
+		newEntry.buf = append(newEntry.buf, e.buf...)
+	} else {
+		// Copy returns the number of elements copied, which will be the minimum of len(src) and len(dst).
+		// https://stackoverflow.com/questions/30182538/why-cant-i-duplicate-a-slice-with-copy
+		newEntry.buf = newEntry.buf[:len(e.buf)]
+		copy(newEntry.buf, e.buf)
+	}
+
 	newEntry.logger = e.logger
 	newEntry.start = e.start
 	newEntry.Level = e.Level
@@ -109,7 +118,9 @@ func (e *Entry) Debugf(msg string, v ...interface{}) {
 func (e *Entry) Info(msg string) {
 	e.Level = InfoLevel
 	e.Message = msg
+
 	handler(e)
+
 }
 
 // Infof level message.
@@ -395,6 +406,66 @@ func duration(d time.Duration) string {
 }
 
 func handler(e *Entry) {
+
+	for _, h := range e.logger.cacheLeveledHandlers(e.Level) {
+
+		newEntry := copyEntry(e)
+
+		err := h.Hook(newEntry)
+		if err != nil {
+			stdlog.Printf("log: log hook failed: %v", err)
+		}
+
+		if len(newEntry.Message) > 0 {
+			newEntry.buf = enc.AppendKey(newEntry.buf, "msg")
+			newEntry.buf = enc.AppendString(newEntry.buf, newEntry.Message)
+		}
+
+		newEntry.buf = enc.AppendEndMarker(newEntry.buf)
+		newEntry.buf = enc.AppendLineBreak(newEntry.buf)
+
+		err = h.Write(newEntry)
+		if err != nil {
+			stdlog.Printf("log: log write failed: %v", err)
+		}
+		putEntry(newEntry)
+	}
+
+	// hs := e.logger.cacheLeveledHandlers(e.Level)
+	// if len(hs) == 0 {
+	// 	putEntry(e)
+	// 	return
+	// }
+
+	// if len(hs) > 1 {
+	// 	handlers(e)
+	// 	return
+	// }
+
+	// h := hs[0]
+
+	// err := h.Hook(e)
+	// if err != nil {
+	// 	stdlog.Printf("log: log hook failed: %v", err)
+	// }
+
+	// if len(e.Message) > 0 {
+	// 	e.buf = enc.AppendKey(e.buf, "msg")
+	// 	e.buf = enc.AppendString(e.buf, e.Message)
+	// }
+
+	// e.buf = enc.AppendEndMarker(e.buf)
+	// e.buf = enc.AppendLineBreak(e.buf)
+
+	// err = h.Write(e)
+	// if err != nil {
+	// 	stdlog.Printf("log: log write failed: %v", err)
+	// }
+
+	putEntry(e)
+}
+
+func handlers(e *Entry) {
 
 	for _, h := range e.logger.cacheLeveledHandlers(e.Level) {
 

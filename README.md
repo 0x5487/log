@@ -3,7 +3,9 @@
 It is a simple structured logging package for Go. 
 ## Features
 * fast, easy to use, and pretty logging for development
-* allow to use different level for each handler
+* low to zero allocation
+* JSON encoding format
+* support multiple output and each output can have their own output level 
 * goroutine safety (thread-safe)
 * colored text for console handler (`linux`, `mac`, and `windows` are supported)
 * `context.Context` integration

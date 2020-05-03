@@ -57,8 +57,17 @@ func (c Context) Errorf(msg string, v ...interface{}) {
 	e.Errorf(msg, v...)
 }
 
+func copyBytes(src []byte) []byte {
+	newBuf := make([]byte, len(src))
+	if len(src) > 0 {
+		copy(newBuf, src)
+	}
+	return newBuf
+}
+
 // Str add string field to current context
 func (c Context) Str(key string, val string) Context {
+	c.buf = copyBytes(c.buf)
 	c.buf = enc.AppendKey(c.buf, key)
 	c.buf = enc.AppendString(c.buf, val)
 	return c
@@ -66,6 +75,7 @@ func (c Context) Str(key string, val string) Context {
 
 // Strs add string field to current context
 func (c Context) Strs(key string, val []string) Context {
+	c.buf = copyBytes(c.buf)
 	c.buf = enc.AppendKey(c.buf, key)
 	c.buf = enc.AppendStrings(c.buf, val)
 	return c
@@ -73,6 +83,7 @@ func (c Context) Strs(key string, val []string) Context {
 
 // Bool add bool field to current context
 func (c Context) Bool(key string, val bool) Context {
+	c.buf = copyBytes(c.buf)
 	c.buf = enc.AppendKey(c.buf, key)
 	c.buf = enc.AppendBool(c.buf, val)
 	return c
@@ -80,6 +91,7 @@ func (c Context) Bool(key string, val bool) Context {
 
 // Int add Int field to current context
 func (c Context) Int(key string, val int) Context {
+	c.buf = copyBytes(c.buf)
 	c.buf = enc.AppendKey(c.buf, key)
 	c.buf = enc.AppendInt(c.buf, val)
 	return c
@@ -87,6 +99,7 @@ func (c Context) Int(key string, val int) Context {
 
 // Ints add Int field to current context
 func (c Context) Ints(key string, val []int) Context {
+	c.buf = copyBytes(c.buf)
 	c.buf = enc.AppendKey(c.buf, key)
 	c.buf = enc.AppendInts(c.buf, val)
 	return c
@@ -94,6 +107,7 @@ func (c Context) Ints(key string, val []int) Context {
 
 // Int8 add Int8 field to current context
 func (c Context) Int8(key string, val int8) Context {
+	c.buf = copyBytes(c.buf)
 	c.buf = enc.AppendKey(c.buf, key)
 	c.buf = enc.AppendInt8(c.buf, val)
 	return c
@@ -101,6 +115,7 @@ func (c Context) Int8(key string, val int8) Context {
 
 // Int16 add Int16 field to current context
 func (c Context) Int16(key string, val int16) Context {
+	c.buf = copyBytes(c.buf)
 	c.buf = enc.AppendKey(c.buf, key)
 	c.buf = enc.AppendInt16(c.buf, val)
 	return c
@@ -108,6 +123,7 @@ func (c Context) Int16(key string, val int16) Context {
 
 // Int32 add Int32 field to current context
 func (c Context) Int32(key string, val int32) Context {
+	c.buf = copyBytes(c.buf)
 	c.buf = enc.AppendKey(c.buf, key)
 	c.buf = enc.AppendInt32(c.buf, val)
 	return c
@@ -115,6 +131,7 @@ func (c Context) Int32(key string, val int32) Context {
 
 // Int64 add Int64 field to current context
 func (c Context) Int64(key string, val int64) Context {
+	c.buf = copyBytes(c.buf)
 	c.buf = enc.AppendKey(c.buf, key)
 	c.buf = enc.AppendInt64(c.buf, val)
 	return c
@@ -122,6 +139,7 @@ func (c Context) Int64(key string, val int64) Context {
 
 // Uint add Uint field to current context
 func (c Context) Uint(key string, val uint) Context {
+	c.buf = copyBytes(c.buf)
 	c.buf = enc.AppendKey(c.buf, key)
 	c.buf = enc.AppendUint(c.buf, val)
 	return c
@@ -129,6 +147,7 @@ func (c Context) Uint(key string, val uint) Context {
 
 // Uint8 add Uint8 field to current context
 func (c Context) Uint8(key string, val uint8) Context {
+	c.buf = copyBytes(c.buf)
 	c.buf = enc.AppendKey(c.buf, key)
 	c.buf = enc.AppendUint8(c.buf, val)
 	return c
@@ -136,6 +155,7 @@ func (c Context) Uint8(key string, val uint8) Context {
 
 // Uint16 add Uint16 field to current context
 func (c Context) Uint16(key string, val uint16) Context {
+	c.buf = copyBytes(c.buf)
 	c.buf = enc.AppendKey(c.buf, key)
 	c.buf = enc.AppendUint16(c.buf, val)
 	return c
@@ -143,6 +163,7 @@ func (c Context) Uint16(key string, val uint16) Context {
 
 // Uint32 add Uint32 field to current context
 func (c Context) Uint32(key string, val uint32) Context {
+	c.buf = copyBytes(c.buf)
 	c.buf = enc.AppendKey(c.buf, key)
 	c.buf = enc.AppendUint32(c.buf, val)
 	return c
@@ -150,6 +171,7 @@ func (c Context) Uint32(key string, val uint32) Context {
 
 // Uint64 add Uint64 field to current context
 func (c Context) Uint64(key string, val uint64) Context {
+	c.buf = copyBytes(c.buf)
 	c.buf = enc.AppendKey(c.buf, key)
 	c.buf = enc.AppendUint64(c.buf, val)
 	return c
@@ -157,6 +179,7 @@ func (c Context) Uint64(key string, val uint64) Context {
 
 // Float32 add float32 field to current context
 func (c Context) Float32(key string, val float32) Context {
+	c.buf = copyBytes(c.buf)
 	c.buf = enc.AppendKey(c.buf, key)
 	c.buf = enc.AppendFloat32(c.buf, val)
 	return c
@@ -164,6 +187,7 @@ func (c Context) Float32(key string, val float32) Context {
 
 // Float64 add Float64 field to current context
 func (c Context) Float64(key string, val float64) Context {
+	c.buf = copyBytes(c.buf)
 	c.buf = enc.AppendKey(c.buf, key)
 	c.buf = enc.AppendFloat64(c.buf, val)
 	return c
@@ -171,6 +195,7 @@ func (c Context) Float64(key string, val float64) Context {
 
 // Err add error field to current context
 func (c Context) Err(err error) Context {
+	c.buf = copyBytes(c.buf)
 	c.buf = enc.AppendKey(c.buf, "error")
 	c.buf = enc.AppendString(c.buf, fmt.Sprintf("%+v", err))
 	return c
@@ -178,6 +203,7 @@ func (c Context) Err(err error) Context {
 
 // Time adds Time field to current context
 func (c Context) Time(key string, val time.Time) Context {
+	c.buf = copyBytes(c.buf)
 	c.buf = enc.AppendKey(c.buf, key)
 	c.buf = enc.AppendTime(c.buf, val, time.RFC3339)
 	return c
@@ -185,6 +211,7 @@ func (c Context) Time(key string, val time.Time) Context {
 
 // Times adds Time field to current context
 func (c Context) Times(key string, val []time.Time) Context {
+	c.buf = copyBytes(c.buf)
 	c.buf = enc.AppendKey(c.buf, key)
 	c.buf = enc.AppendTimes(c.buf, val, time.RFC3339)
 	return c
@@ -192,6 +219,7 @@ func (c Context) Times(key string, val []time.Time) Context {
 
 // Interface adds the field key with i marshaled using reflection.
 func (c Context) Interface(key string, val interface{}) Context {
+	c.buf = copyBytes(c.buf)
 	c.buf = enc.AppendKey(c.buf, key)
 	c.buf = enc.AppendInterface(c.buf, val)
 	return c
