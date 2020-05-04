@@ -4,7 +4,6 @@ import (
 	"fmt"
 	stdlog "log"
 	"os"
-	"strings"
 	"sync"
 	"time"
 
@@ -92,7 +91,7 @@ func (e *Entry) Trace(msg string) *Entry {
 // Stop should be used with Trace, to fire off the completion message. When
 // an `err` is passed the "error" field is set, and the log level is error.
 func (e *Entry) Stop() {
-	e = e.Str("duration", duration(time.Since(e.start)))
+	//e = e.Str("duration", duration(time.Since(e.start)))
 	handler(e)
 }
 
@@ -376,31 +375,6 @@ func (e *Entry) Interface(key string, val interface{}) *Entry {
 	return e
 }
 
-const (
-	day  = time.Minute * 60 * 24
-	year = 365 * day
-)
-
-func duration(d time.Duration) string {
-	if d < day {
-		return d.String()
-	}
-
-	var b strings.Builder
-
-	if d >= year {
-		years := d / year
-		fmt.Fprintf(&b, "%dy", years)
-		d -= years * year
-	}
-
-	days := d / day
-	d -= days * day
-	fmt.Fprintf(&b, "%dd%s", days, d)
-
-	return b.String()
-}
-
 func handler(e *Entry) {
 
 	for _, h := range e.logger.cacheLeveledHandlers(e.Level) {
@@ -457,35 +431,6 @@ func handler(e *Entry) {
 	// if err != nil {
 	// 	stdlog.Printf("log: log write failed: %v", err)
 	// }
-
-	putEntry(e)
-}
-
-func handlers(e *Entry) {
-
-	for _, h := range e.logger.cacheLeveledHandlers(e.Level) {
-
-		newEntry := copyEntry(e)
-
-		err := h.Hook(newEntry)
-		if err != nil {
-			stdlog.Printf("log: log hook failed: %v", err)
-		}
-
-		if len(newEntry.Message) > 0 {
-			newEntry.buf = enc.AppendKey(newEntry.buf, "msg")
-			newEntry.buf = enc.AppendString(newEntry.buf, newEntry.Message)
-		}
-
-		newEntry.buf = enc.AppendEndMarker(newEntry.buf)
-		newEntry.buf = enc.AppendLineBreak(newEntry.buf)
-
-		err = h.Write(newEntry.buf)
-		if err != nil {
-			stdlog.Printf("log: log write failed: %v", err)
-		}
-		putEntry(newEntry)
-	}
 
 	putEntry(e)
 }
