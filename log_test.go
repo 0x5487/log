@@ -101,8 +101,45 @@ func TestContext(t *testing.T) {
 	//t.Log(string(h.Out))
 	assert.Equal(t, `{"app":"stant","a":"b","level":"INFO","msg":"hello world"}`+"\n", string(h.Out))
 
-	logger.Str("c", "d").Info("hello world")
-	assert.Equal(t, `{"app":"stant","c":"d","level":"INFO","msg":"hello world"}`+"\n", string(h.Out))
+	logger.Bool("bool", true).Info("hello world")
+	assert.Equal(t, `{"app":"stant","bool":true,"level":"INFO","msg":"hello world"}`+"\n", string(h.Out))
+
+	log.Int("int", 1).Info("info")
+	assert.Equal(t, `{"int":1,"level":"INFO","msg":"info"}`+"\n", string(h.Out))
+
+	log.Int8("int8", 1).Info("info")
+	assert.Equal(t, `{"int8":1,"level":"INFO","msg":"info"}`+"\n", string(h.Out))
+
+	log.Int16("int16", 1).Info("info")
+	assert.Equal(t, `{"int16":1,"level":"INFO","msg":"info"}`+"\n", string(h.Out))
+
+	log.Int32("int32", 1).Info("info")
+	assert.Equal(t, `{"int32":1,"level":"INFO","msg":"info"}`+"\n", string(h.Out))
+
+	log.Int64("int64", 1).Info("info")
+	assert.Equal(t, `{"int64":1,"level":"INFO","msg":"info"}`+"\n", string(h.Out))
+
+	log.Uint("uint", 1).Info("info")
+	assert.Equal(t, `{"uint":1,"level":"INFO","msg":"info"}`+"\n", string(h.Out))
+
+	log.Uint8("uint8", 1).Info("info")
+	assert.Equal(t, `{"uint8":1,"level":"INFO","msg":"info"}`+"\n", string(h.Out))
+
+	log.Uint16("uint16", 1).Info("info")
+	assert.Equal(t, `{"uint16":1,"level":"INFO","msg":"info"}`+"\n", string(h.Out))
+
+	log.Uint32("uint32", 1).Info("info")
+	assert.Equal(t, `{"uint32":1,"level":"INFO","msg":"info"}`+"\n", string(h.Out))
+
+	log.Uint64("uint64", 1).Info("info")
+	assert.Equal(t, `{"uint64":1,"level":"INFO","msg":"info"}`+"\n", string(h.Out))
+
+	log.Float32("float32", 1).Info("info")
+	assert.Equal(t, `{"float32":1,"level":"INFO","msg":"info"}`+"\n", string(h.Out))
+
+	log.Float64("float64", 1).Info("info")
+	assert.Equal(t, `{"float64":1,"level":"INFO","msg":"info"}`+"\n", string(h.Out))
+
 }
 
 func TestFlush(t *testing.T) {
