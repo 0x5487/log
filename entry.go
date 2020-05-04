@@ -82,7 +82,7 @@ func copyEntry(e *Entry) *Entry {
 // Trace returns a new entry with a Stop method to fire off
 // a corresponding completion log, useful with defer.
 func (e *Entry) Trace(msg string) *Entry {
-	e.Level = TraceLevel
+	e.Level = InfoLevel
 	e.Message = msg
 	e.start = time.Now().UTC()
 	return e
@@ -91,7 +91,7 @@ func (e *Entry) Trace(msg string) *Entry {
 // Stop should be used with Trace, to fire off the completion message. When
 // an `err` is passed the "error" field is set, and the log level is error.
 func (e *Entry) Stop() {
-	//e = e.Str("duration", duration(time.Since(e.start)))
+	e = e.Dur("duration", time.Since(e.start))
 	handler(e)
 }
 
@@ -362,6 +362,16 @@ func (e *Entry) Times(key string, val []time.Time) *Entry {
 	}
 	e.buf = enc.AppendKey(e.buf, key)
 	e.buf = enc.AppendTimes(e.buf, val, time.RFC3339)
+	return e
+}
+
+// Dur adds Duration field to current entry
+func (e *Entry) Dur(key string, d time.Duration) *Entry {
+	if e == nil {
+		return e
+	}
+	e.buf = enc.AppendKey(e.buf, key)
+	e.buf = enc.AppendDuration(e.buf, d, time.Millisecond, false)
 	return e
 }
 

@@ -152,22 +152,26 @@ func TestFlush(t *testing.T) {
 }
 
 func TestLevels(t *testing.T) {
-	h := memory.New()
-	log.RegisterHandler(h, log.DebugLevel, log.InfoLevel, log.WarnLevel, log.ErrorLevel)
+	levels := log.GetLevelsFromMinLevel("debug")
+	assert.Equal(t, log.AllLevels, levels)
 
-	log.Debug("debug1")
-	//t.Log(string(h.Out))
-	assert.Equal(t, `{"level":"DEBUG","msg":"debug1"}`+"\n", string(h.Out))
+	levels = log.GetLevelsFromMinLevel("")
+	assert.Equal(t, log.AllLevels, levels)
 
-	log.Info("info1")
-	assert.Equal(t, `{"level":"INFO","msg":"info1"}`+"\n", string(h.Out))
+	levels = log.GetLevelsFromMinLevel("info")
+	assert.Equal(t, []log.Level{log.InfoLevel, log.WarnLevel, log.ErrorLevel, log.PanicLevel, log.FatalLevel}, levels)
 
-	log.Warn("warn1")
-	assert.Equal(t, `{"level":"WARN","msg":"warn1"}`+"\n", string(h.Out))
+	levels = log.GetLevelsFromMinLevel("warn")
+	assert.Equal(t, []log.Level{log.WarnLevel, log.ErrorLevel, log.PanicLevel, log.FatalLevel}, levels)
 
-	log.Error("error1")
-	assert.Equal(t, `{"level":"ERROR","msg":"error1"}`+"\n", string(h.Out))
+	levels = log.GetLevelsFromMinLevel("error")
+	assert.Equal(t, []log.Level{log.ErrorLevel, log.PanicLevel, log.FatalLevel}, levels)
 
+	levels = log.GetLevelsFromMinLevel("panic")
+	assert.Equal(t, []log.Level{log.PanicLevel, log.FatalLevel}, levels)
+
+	levels = log.GetLevelsFromMinLevel("fatal")
+	assert.Equal(t, []log.Level{log.FatalLevel}, levels)
 }
 
 func TestStdContext(t *testing.T) {
@@ -243,18 +247,17 @@ func TestAdvancedFields(t *testing.T) {
 
 }
 
-// func TestTrace(t *testing.T) {
-// 	h := memory.New()
-// 	log.RegisterHandler(h, log.AllLevels...)
+func TestTrace(t *testing.T) {
+	h := memory.New()
+	log.RegisterHandler(h, log.AllLevels...)
 
-// 	func() (err error) {
-// 		defer log.Trace("trace").Stop()
-// 		return nil
-// 	}()
+	func() (err error) {
+		defer log.Trace("trace").Stop()
+		return nil
+	}()
+	assert.Equal(t, `{"duration":0,"level":"INFO","msg":"trace"}`+"\n", string(h.Out))
 
-// 	t.Log("aa" + string(h.Out))
-
-// }
+}
 
 // func TestWithDefaultFields(t *testing.T) {
 // 	h := memory.New()
