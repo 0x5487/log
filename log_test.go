@@ -234,6 +234,8 @@ func TestAdvancedFields(t *testing.T) {
 // }
 
 func TestGoroutineSafe(t *testing.T) {
+	h := memory.New()
+	log.RegisterHandler(h, log.AllLevels...)
 
 	logger := log.Str("request_id", "abc")
 
@@ -242,10 +244,12 @@ func TestGoroutineSafe(t *testing.T) {
 	go func() {
 		defer wg.Done()
 		logger.Str("name", "abc")
+		logger.Info("test")
 	}()
 	go func() {
 		defer wg.Done()
 		logger.Str("name", "xyz")
+		logger.Info("test")
 	}()
 	wg.Wait()
 }

@@ -39,7 +39,7 @@ func newEntry(l *logger, buf []byte) *Entry {
 		e.buf = e.buf[:0]
 		e.buf = enc.AppendBeginMarker(e.buf)
 	} else {
-		e.buf = buf
+		e.buf = buf // race condition because it use context's buf.  However, we create new buf within handler func
 	}
 
 	return e
@@ -78,10 +78,6 @@ func copyEntry(e *Entry) *Entry {
 	newEntry.Level = e.Level
 	newEntry.Message = e.Message
 	return newEntry
-}
-
-func (e *Entry) Buffer() []byte {
-	return e.buf
 }
 
 // Trace returns a new entry with a Stop method to fire off
@@ -457,7 +453,7 @@ func handler(e *Entry) {
 	// e.buf = enc.AppendEndMarker(e.buf)
 	// e.buf = enc.AppendLineBreak(e.buf)
 
-	// err = h.Write(e)
+	// err = h.Write(e.buf)
 	// if err != nil {
 	// 	stdlog.Printf("log: log write failed: %v", err)
 	// }
