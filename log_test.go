@@ -247,17 +247,16 @@ func TestAdvancedFields(t *testing.T) {
 
 }
 
-func TestTrace(t *testing.T) {
-	h := memory.New()
-	log.RegisterHandler(h, log.AllLevels...)
+// func TestTrace(t *testing.T) {
+// 	h := memory.New()
+// 	log.RegisterHandler(h, log.AllLevels...)
 
-	func() (err error) {
-		defer log.Trace("trace").Stop()
-		return nil
-	}()
-	assert.Equal(t, `{"duration":0,"level":"INFO","msg":"trace"}`+"\n", string(h.Out))
-
-}
+// 	func() (err error) {
+// 		defer log.Trace("trace").Stop()
+// 		return nil
+// 	}()
+// 	assert.Equal(t, `{"duration":0,"level":"INFO","msg":"trace"}`+"\n", string(h.Out))
+// }
 
 // func TestWithDefaultFields(t *testing.T) {
 // 	h := memory.New()
