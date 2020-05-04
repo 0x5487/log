@@ -5,12 +5,18 @@ import (
 	"errors"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/jasonsoft/log"
 	"github.com/jasonsoft/log/handlers/discard"
 	"github.com/jasonsoft/log/handlers/memory"
 	"github.com/tj/assert"
 )
+
+type Person struct {
+	Name string
+	Age  int
+}
 
 func TestNoHandler(t *testing.T) {
 	log.Info("no handler 1")
@@ -158,8 +164,12 @@ func TestStandardFields(t *testing.T) {
 	h := memory.New()
 	log.RegisterHandler(h, log.GetLevelsFromMinLevel("debug")...)
 
+	time1, _ := time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
+	time2, _ := time.Parse(time.RFC3339, "2012-11-01T22:08:41+08:00")
+
 	logger := log.
 		Str("hello", "world").
+		Strs("strs", []string{"str1", "str2"}).
 		Bool("is_enabled", true).
 		Int("int", 1).
 		Int8("int8", int8(2)).
@@ -172,12 +182,15 @@ func TestStandardFields(t *testing.T) {
 		Uint32("uint32", uint32(9)).
 		Uint64("uint64", uint64(10)).
 		Float32("float32", float32(11.123)).
-		Float64("float64", float64(12.123))
+		Float64("float64", float64(12.123)).
+		Time("time", time1).
+		Times("times", []time.Time{time1, time2}).
+		Interface("person", Person{})
 
 	logger.Debug("debug")
 
 	//t.Log(string(h.Out))
-	assert.Equal(t, `{"hello":"world","is_enabled":true,"int":1,"int8":2,"int16":3,"int32":4,"int64":5,"uint":6,"uint8":7,"uint16":8,"uint32":9,"uint64":10,"float32":11.123,"float64":12.123,"level":"DEBUG","msg":"debug"}`+"\n", string(h.Out))
+	assert.Equal(t, `{"hello":"world","strs":["str1","str2"],"is_enabled":true,"int":1,"int8":2,"int16":3,"int32":4,"int64":5,"uint":6,"uint8":7,"uint16":8,"uint32":9,"uint64":10,"float32":11.123,"float64":12.123,"time":"2012-11-01T22:08:41Z","times":["2012-11-01T22:08:41Z","2012-11-01T22:08:41+08:00"],"person":{"Name":"","Age":0},"level":"DEBUG","msg":"debug"}`+"\n", string(h.Out))
 
 }
 
@@ -243,12 +256,12 @@ func TestGoroutineSafe(t *testing.T) {
 	wg.Add(2)
 	go func() {
 		defer wg.Done()
-		logger.Str("name", "abc")
+		_ = logger.Str("name", "abc")
 		logger.Info("test")
 	}()
 	go func() {
 		defer wg.Done()
-		logger.Str("name", "xyz")
+		_ = logger.Str("name", "xyz")
 		logger.Info("test")
 	}()
 	wg.Wait()

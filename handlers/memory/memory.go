@@ -30,6 +30,8 @@ func (h *Handler) Hook(e *log.Entry) error {
 
 // Write implements log.Handler.
 func (h *Handler) Write(bytes []byte) error {
+	h.mu.Lock()
+	defer h.mu.Unlock()
 	h.Out = bytes
 	return nil
 }
