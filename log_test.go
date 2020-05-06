@@ -23,12 +23,13 @@ func TestNoHandler(t *testing.T) {
 	log.Warnf("no handler 2")
 }
 
-func TestRegisterHandlers(t *testing.T) {
+func TestAddHandlers(t *testing.T) {
+	log.RemoveAllHandlers()
 	h1 := memory.New()
-	log.RegisterHandler(h1, log.AllLevels...)
+	log.AddHandler(h1, log.AllLevels...)
 
 	h2 := memory.New()
-	log.RegisterHandler(h2, log.AllLevels...)
+	log.AddHandler(h2, log.AllLevels...)
 
 	log.Info("info")
 	assert.Equal(t, `{"level":"INFO","msg":"info"}`+"\n", string(h1.Out))
@@ -36,8 +37,9 @@ func TestRegisterHandlers(t *testing.T) {
 }
 
 func TestLog(t *testing.T) {
+	log.RemoveAllHandlers()
 	h := memory.New()
-	log.RegisterHandler(h, log.AllLevels...)
+	log.AddHandler(h, log.AllLevels...)
 
 	log.Debug("debug")
 	assert.Equal(t, `{"level":"DEBUG","msg":"debug"}`+"\n", string(h.Out))
@@ -92,8 +94,9 @@ func TestLog(t *testing.T) {
 }
 
 func TestContext(t *testing.T) {
+	log.RemoveAllHandlers()
 	h := memory.New()
-	log.RegisterHandler(h, log.AllLevels...)
+	log.AddHandler(h, log.AllLevels...)
 
 	logger := log.Str("app", "stant")
 
@@ -143,8 +146,9 @@ func TestContext(t *testing.T) {
 }
 
 func TestFlush(t *testing.T) {
+	log.RemoveAllHandlers()
 	h := memory.New()
-	log.RegisterHandler(h, log.GetLevelsFromMinLevel("debug")...)
+	log.AddHandler(h, log.GetLevelsFromMinLevel("debug")...)
 
 	log.Debug("flush")
 	log.Flush()
@@ -152,6 +156,8 @@ func TestFlush(t *testing.T) {
 }
 
 func TestLevels(t *testing.T) {
+	log.RemoveAllHandlers()
+
 	levels := log.GetLevelsFromMinLevel("debug")
 	assert.Equal(t, log.AllLevels, levels)
 
@@ -175,8 +181,10 @@ func TestLevels(t *testing.T) {
 }
 
 func TestStdContext(t *testing.T) {
+	log.RemoveAllHandlers()
+
 	h := memory.New()
-	log.RegisterHandler(h, log.AllLevels...)
+	log.AddHandler(h, log.AllLevels...)
 
 	t.Run("create new context", func(t *testing.T) {
 		ctx := context.Background()
@@ -202,8 +210,10 @@ func TestStdContext(t *testing.T) {
 }
 
 func TestStandardFields(t *testing.T) {
+	log.RemoveAllHandlers()
+
 	h := memory.New()
-	log.RegisterHandler(h, log.GetLevelsFromMinLevel("debug")...)
+	log.AddHandler(h, log.GetLevelsFromMinLevel("debug")...)
 
 	time1, _ := time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
 	time2, _ := time.Parse(time.RFC3339, "2012-11-01T22:08:41+08:00")
@@ -236,8 +246,10 @@ func TestStandardFields(t *testing.T) {
 }
 
 func TestAdvancedFields(t *testing.T) {
+	log.RemoveAllHandlers()
+
 	h := memory.New()
-	log.RegisterHandler(h, log.AllLevels...)
+	log.AddHandler(h, log.AllLevels...)
 
 	err := errors.New("something bad happened")
 	log.Err(err).Error("too bad")
@@ -249,7 +261,7 @@ func TestAdvancedFields(t *testing.T) {
 
 // func TestTrace(t *testing.T) {
 // 	h := memory.New()
-// 	log.RegisterHandler(h, log.AllLevels...)
+// 	log.AddHandler(h, log.AllLevels...)
 
 // 	func() (err error) {
 // 		defer log.Trace("trace").Stop()
@@ -258,36 +270,33 @@ func TestAdvancedFields(t *testing.T) {
 // 	assert.Equal(t, `{"duration":0,"level":"INFO","msg":"trace"}`+"\n", string(h.Out))
 // }
 
-// func TestWithDefaultFields(t *testing.T) {
-// 	h := memory.New()
-// 	log.RegisterHandler(h, log.AllLevels...)
+type AppHook struct {
+}
 
-// 	log.WithDefaultFields(log.Fields{
-// 		"app_id": "santa",
-// 		"env":    "dev",
-// 	})
-// 	log.Info("upload complete")
+func (h *AppHook) Hook(e *log.Entry) error {
+	e.Str("app_id", "santa").Str("env", "dev")
+	return nil
+}
 
-// 	logger := log.WithFields(log.Fields{"file": "sloth.png"})
-// 	logger.Debugf("debug test")
+func TestHook(t *testing.T) {
+	log.RemoveAllHandlers()
 
-// 	assert.Equal(t, 2, len(h.Entries))
+	h := memory.New()
+	log.AddHandler(h, log.AllLevels...)
 
-// 	e := h.Entries[0]
-// 	assert.Equal(t, "upload complete", e.Message)
-// 	assert.Equal(t, log.InfoLevel, e.Level)
-// 	assert.Equal(t, e.Fields, log.Fields{"app_id": "santa", "env": "dev"})
+	log.AddHook(&AppHook{})
 
-// 	e = h.Entries[1]
-// 	assert.Equal(t, "debug test", e.Message)
-// 	assert.Equal(t, log.DebugLevel, e.Level)
-// 	assert.Equal(t, e.Fields, log.Fields{"app_id": "santa", "env": "dev", "file": "sloth.png"})
+	log.Info("upload complete")
 
-// }
+	//t.Log(string(h.Out))
+	assert.Equal(t, `{"app_id":"santa","env":"dev","level":"INFO","msg":"upload complete"}`+"\n", string(h.Out))
+}
 
 func TestGoroutineSafe(t *testing.T) {
+	log.RemoveAllHandlers()
+
 	h := memory.New()
-	log.RegisterHandler(h, log.AllLevels...)
+	log.AddHandler(h, log.AllLevels...)
 
 	logger := log.Str("request_id", "abc")
 
@@ -311,7 +320,7 @@ func BenchmarkDisabledAddingFields(b *testing.B) {
 
 	b.Run("jasnosoft/log", func(b *testing.B) {
 		h := discard.New()
-		log.RegisterHandler(h, log.InfoLevel)
+		log.AddHandler(h, log.InfoLevel)
 		b.ResetTimer()
 		b.RunParallel(func(pb *testing.PB) {
 			for pb.Next() {

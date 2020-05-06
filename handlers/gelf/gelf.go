@@ -47,8 +47,8 @@ func (g *Gelf) close() error {
 	return nil
 }
 
-// Hook handles the log entry
-func (g *Gelf) Hook(e *log.Entry) error {
+// BeforeWriting handles the log entry
+func (g *Gelf) BeforeWriting(e *log.Entry) error {
 	e.Str("version", "1.1").
 		Uint8("level", toGelfLevel(e.Level)).
 		Str("short_message", e.Message)

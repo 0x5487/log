@@ -13,7 +13,7 @@ var (
 
 // Handler is an interface that log handlers need to be implemented
 type Handler interface {
-	Hook(*Entry) error
+	BeforeWriting(*Entry) error
 	Write([]byte) error
 }
 
@@ -22,8 +22,14 @@ type Flusher interface {
 	Flush() error
 }
 
+// Hooker is an interface that allow us to do something before writing
+type Hooker interface {
+	Hook(*Entry) error
+}
+
 type logger struct {
 	handles              []Handler
+	hooks                []Hooker
 	leveledHandlers      map[Level][]Handler
 	cacheLeveledHandlers func(level Level) []Handler
 	rwMutex              sync.RWMutex
@@ -66,9 +72,9 @@ func (l *logger) getLeveledHandlers() func(level Level) []Handler {
 	}
 }
 
-// RegisterHandler adds a new Log Handler and specifies what log levels
+// AddHandler adds a new Log Handler and specifies what log levels
 // the handler will be passed log entries for
-func RegisterHandler(handler Handler, levels ...Level) {
+func AddHandler(handler Handler, levels ...Level) {
 	_logger.rwMutex.Lock()
 	defer _logger.rwMutex.Unlock()
 
@@ -78,6 +84,25 @@ func RegisterHandler(handler Handler, levels ...Level) {
 
 	_logger.handles = append(_logger.handles, handler)
 	_logger.cacheLeveledHandlers = _logger.getLeveledHandlers()
+}
+
+// RemoveAllHandlers removes all handlers
+func RemoveAllHandlers() {
+	_logger.rwMutex.Lock()
+	defer _logger.rwMutex.Unlock()
+
+	_logger.leveledHandlers = map[Level][]Handler{}
+	_logger.handles = []Handler{}
+	_logger.cacheLeveledHandlers = _logger.getLeveledHandlers()
+}
+
+// AddHook adds a new Hook to log entry
+func AddHook(hook Hooker) error {
+	_logger.rwMutex.Lock()
+	defer _logger.rwMutex.Unlock()
+
+	_logger.hooks = append(_logger.hooks, hook)
+	return nil
 }
 
 // Debug level formatted message

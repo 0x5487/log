@@ -391,7 +391,12 @@ func handler(e *Entry) {
 
 		newEntry := copyEntry(e)
 
-		err := h.Hook(newEntry)
+		// call hook interface
+		for _, hooker := range _logger.hooks {
+			hooker.Hook(newEntry)
+		}
+
+		err := h.BeforeWriting(newEntry)
 		if err != nil {
 			stdlog.Printf("log: log hook failed: %v", err)
 		}

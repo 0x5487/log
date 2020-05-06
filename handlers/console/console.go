@@ -51,8 +51,8 @@ func New() log.Handler {
 	}
 }
 
-// Hook handles the log entry
-func (h *Console) Hook(e *log.Entry) error {
+// BeforeWriting handles the log entry
+func (h *Console) BeforeWriting(e *log.Entry) error {
 	e.Str("level", e.Level.String())
 
 	return nil

@@ -10,13 +10,13 @@ import (
 func main() {
 	// use console handler to log all level logs
 	clog := console.New()
-	log.RegisterHandler(clog, log.AllLevels...)
+	log.AddHandler(clog, log.AllLevels...)
 
 	// optional: allow handlers to clear all buffer
 	defer log.Flush()
 
 	// use trace to get how long it takes
-	//defer log.Trace("time to run").Stop()
+	defer log.Trace("time to run").Stop()
 
 	logger := log.
 		Str("app_id", "santa").

@@ -21,8 +21,8 @@ func New() *Handler {
 	}
 }
 
-// Hook implements log.Handler.
-func (h *Handler) Hook(e *log.Entry) error {
+// BeforeWriting implements log.Handler.
+func (h *Handler) BeforeWriting(e *log.Entry) error {
 	e.Str("level", e.Level.String())
 
 	return nil
