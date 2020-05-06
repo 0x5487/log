@@ -34,7 +34,7 @@ func BenchmarkDisabledWithoutFields(b *testing.B) {
 	b.Logf("Logging at a disabled level without any structured context.")
 	b.Run("jasnosoft/log", func(b *testing.B) {
 		h := jasonDiscard.New()
-		jasonLog.RegisterHandler(h, jasonLog.ErrorLevel)
+		jasonLog.AddHandler(h, jasonLog.ErrorLevel)
 		b.ResetTimer()
 		b.RunParallel(func(pb *testing.PB) {
 			for pb.Next() {
@@ -114,7 +114,7 @@ func BenchmarkDisabledAccumulatedContext(b *testing.B) {
 	b.Logf("Logging at a disabled level with some accumulated context.")
 	b.Run("jasnosoft/log", func(b *testing.B) {
 		h := jasonDiscard.New()
-		jasonLog.RegisterHandler(h, jasonLog.ErrorLevel)
+		jasonLog.AddHandler(h, jasonLog.ErrorLevel)
 		logger := fakeJasonLogFields()
 		b.ResetTimer()
 		b.RunParallel(func(pb *testing.PB) {
@@ -197,7 +197,7 @@ func BenchmarkDisabledAddingFields(b *testing.B) {
 
 	b.Run("jasnosoft/log", func(b *testing.B) {
 		h := jasonDiscard.New()
-		jasonLog.RegisterHandler(h, jasonLog.ErrorLevel)
+		jasonLog.AddHandler(h, jasonLog.ErrorLevel)
 		b.ResetTimer()
 		b.RunParallel(func(pb *testing.PB) {
 			for pb.Next() {
@@ -271,7 +271,7 @@ func BenchmarkWithoutFields(b *testing.B) {
 
 	b.Run("jasnosoft/log", func(b *testing.B) {
 		h := jasonDiscard.New()
-		jasonLog.RegisterHandler(h, jasonLog.InfoLevel)
+		jasonLog.AddHandler(h, jasonLog.InfoLevel)
 		b.ResetTimer()
 		b.RunParallel(func(pb *testing.PB) {
 			for pb.Next() {
@@ -423,7 +423,7 @@ func BenchmarkAccumulatedContext(b *testing.B) {
 
 	b.Run("jasnosoft/log", func(b *testing.B) {
 		h := jasonDiscard.New()
-		jasonLog.RegisterHandler(h, jasonLog.InfoLevel)
+		jasonLog.AddHandler(h, jasonLog.InfoLevel)
 		logger := fakeJasonLogFields()
 		b.ResetTimer()
 		b.RunParallel(func(pb *testing.PB) {
@@ -433,131 +433,131 @@ func BenchmarkAccumulatedContext(b *testing.B) {
 		})
 	})
 
-	// b.Run("apex/log", func(b *testing.B) {
-	// 	logger := newApexLog().WithFields(fakeApexFields())
-	// 	b.ResetTimer()
-	// 	b.RunParallel(func(pb *testing.PB) {
-	// 		for pb.Next() {
-	// 			logger.Info(getMessage(0))
-	// 		}
-	// 	})
-	// })
+	b.Run("apex/log", func(b *testing.B) {
+		logger := newApexLog().WithFields(fakeApexFields())
+		b.ResetTimer()
+		b.RunParallel(func(pb *testing.PB) {
+			for pb.Next() {
+				logger.Info(getMessage(0))
+			}
+		})
+	})
 
-	// b.Run("Zap", func(b *testing.B) {
-	// 	logger := newZapLogger(zap.DebugLevel).With(fakeFields()...)
-	// 	b.ResetTimer()
-	// 	b.RunParallel(func(pb *testing.PB) {
-	// 		for pb.Next() {
-	// 			logger.Info(getMessage(0))
-	// 		}
-	// 	})
-	// })
-	// b.Run("Zap.Check", func(b *testing.B) {
-	// 	logger := newZapLogger(zap.DebugLevel).With(fakeFields()...)
-	// 	b.ResetTimer()
-	// 	b.RunParallel(func(pb *testing.PB) {
-	// 		for pb.Next() {
-	// 			if ce := logger.Check(zap.InfoLevel, getMessage(0)); ce != nil {
-	// 				ce.Write()
-	// 			}
-	// 		}
-	// 	})
-	// })
-	// b.Run("Zap.CheckSampled", func(b *testing.B) {
-	// 	logger := newSampledLogger(zap.DebugLevel).With(fakeFields()...)
-	// 	b.ResetTimer()
-	// 	b.RunParallel(func(pb *testing.PB) {
-	// 		i := 0
-	// 		for pb.Next() {
-	// 			i++
-	// 			if ce := logger.Check(zap.InfoLevel, getMessage(i)); ce != nil {
-	// 				ce.Write()
-	// 			}
-	// 		}
-	// 	})
-	// })
-	// b.Run("Zap.Sugar", func(b *testing.B) {
-	// 	logger := newZapLogger(zap.DebugLevel).With(fakeFields()...).Sugar()
-	// 	b.ResetTimer()
-	// 	b.RunParallel(func(pb *testing.PB) {
-	// 		for pb.Next() {
-	// 			logger.Info(getMessage(0))
-	// 		}
-	// 	})
-	// })
-	// b.Run("Zap.SugarFormatting", func(b *testing.B) {
-	// 	logger := newZapLogger(zap.DebugLevel).With(fakeFields()...).Sugar()
-	// 	b.ResetTimer()
-	// 	b.RunParallel(func(pb *testing.PB) {
-	// 		for pb.Next() {
-	// 			logger.Infof("%v %v %v %s %v %v %v %v %v %s\n", fakeFmtArgs()...)
-	// 		}
-	// 	})
-	// })
+	b.Run("Zap", func(b *testing.B) {
+		logger := newZapLogger(zap.DebugLevel).With(fakeFields()...)
+		b.ResetTimer()
+		b.RunParallel(func(pb *testing.PB) {
+			for pb.Next() {
+				logger.Info(getMessage(0))
+			}
+		})
+	})
+	b.Run("Zap.Check", func(b *testing.B) {
+		logger := newZapLogger(zap.DebugLevel).With(fakeFields()...)
+		b.ResetTimer()
+		b.RunParallel(func(pb *testing.PB) {
+			for pb.Next() {
+				if ce := logger.Check(zap.InfoLevel, getMessage(0)); ce != nil {
+					ce.Write()
+				}
+			}
+		})
+	})
+	b.Run("Zap.CheckSampled", func(b *testing.B) {
+		logger := newSampledLogger(zap.DebugLevel).With(fakeFields()...)
+		b.ResetTimer()
+		b.RunParallel(func(pb *testing.PB) {
+			i := 0
+			for pb.Next() {
+				i++
+				if ce := logger.Check(zap.InfoLevel, getMessage(i)); ce != nil {
+					ce.Write()
+				}
+			}
+		})
+	})
+	b.Run("Zap.Sugar", func(b *testing.B) {
+		logger := newZapLogger(zap.DebugLevel).With(fakeFields()...).Sugar()
+		b.ResetTimer()
+		b.RunParallel(func(pb *testing.PB) {
+			for pb.Next() {
+				logger.Info(getMessage(0))
+			}
+		})
+	})
+	b.Run("Zap.SugarFormatting", func(b *testing.B) {
+		logger := newZapLogger(zap.DebugLevel).With(fakeFields()...).Sugar()
+		b.ResetTimer()
+		b.RunParallel(func(pb *testing.PB) {
+			for pb.Next() {
+				logger.Infof("%v %v %v %s %v %v %v %v %v %s\n", fakeFmtArgs()...)
+			}
+		})
+	})
 
-	// b.Run("go-kit/kit/log", func(b *testing.B) {
-	// 	logger := newKitLog(fakeSugarFields()...)
-	// 	b.ResetTimer()
-	// 	b.RunParallel(func(pb *testing.PB) {
-	// 		for pb.Next() {
-	// 			logger.Log(getMessage(0), getMessage(1))
-	// 		}
-	// 	})
-	// })
-	// b.Run("inconshreveable/log15", func(b *testing.B) {
-	// 	logger := newLog15().New(fakeSugarFields())
-	// 	b.ResetTimer()
-	// 	b.RunParallel(func(pb *testing.PB) {
-	// 		for pb.Next() {
-	// 			logger.Info(getMessage(0))
-	// 		}
-	// 	})
-	// })
-	// b.Run("sirupsen/logrus", func(b *testing.B) {
-	// 	logger := newLogrus().WithFields(fakeLogrusFields())
-	// 	b.ResetTimer()
-	// 	b.RunParallel(func(pb *testing.PB) {
-	// 		for pb.Next() {
-	// 			logger.Info(getMessage(0))
-	// 		}
-	// 	})
-	// })
-	// b.Run("rs/zerolog", func(b *testing.B) {
-	// 	logger := fakeZerologContext(newZerolog().With()).Logger()
-	// 	b.ResetTimer()
-	// 	b.RunParallel(func(pb *testing.PB) {
-	// 		for pb.Next() {
-	// 			logger.Info().Msg(getMessage(0))
-	// 		}
-	// 	})
-	// })
-	// b.Run("rs/zerolog.Check", func(b *testing.B) {
-	// 	logger := fakeZerologContext(newZerolog().With()).Logger()
-	// 	b.ResetTimer()
-	// 	b.RunParallel(func(pb *testing.PB) {
-	// 		for pb.Next() {
-	// 			if e := logger.Info(); e.Enabled() {
-	// 				e.Msg(getMessage(0))
-	// 			}
-	// 		}
-	// 	})
-	// })
-	// b.Run("rs/zerolog.Formatting", func(b *testing.B) {
-	// 	logger := fakeZerologContext(newZerolog().With()).Logger()
-	// 	b.ResetTimer()
-	// 	b.RunParallel(func(pb *testing.PB) {
-	// 		for pb.Next() {
-	// 			logger.Info().Msgf("%v %v %v %s %v %v %v %v %v %s\n", fakeFmtArgs()...)
-	// 		}
-	// 	})
-	// })
+	b.Run("go-kit/kit/log", func(b *testing.B) {
+		logger := newKitLog(fakeSugarFields()...)
+		b.ResetTimer()
+		b.RunParallel(func(pb *testing.PB) {
+			for pb.Next() {
+				logger.Log(getMessage(0), getMessage(1))
+			}
+		})
+	})
+	b.Run("inconshreveable/log15", func(b *testing.B) {
+		logger := newLog15().New(fakeSugarFields())
+		b.ResetTimer()
+		b.RunParallel(func(pb *testing.PB) {
+			for pb.Next() {
+				logger.Info(getMessage(0))
+			}
+		})
+	})
+	b.Run("sirupsen/logrus", func(b *testing.B) {
+		logger := newLogrus().WithFields(fakeLogrusFields())
+		b.ResetTimer()
+		b.RunParallel(func(pb *testing.PB) {
+			for pb.Next() {
+				logger.Info(getMessage(0))
+			}
+		})
+	})
+	b.Run("rs/zerolog", func(b *testing.B) {
+		logger := fakeZerologContext(newZerolog().With()).Logger()
+		b.ResetTimer()
+		b.RunParallel(func(pb *testing.PB) {
+			for pb.Next() {
+				logger.Info().Msg(getMessage(0))
+			}
+		})
+	})
+	b.Run("rs/zerolog.Check", func(b *testing.B) {
+		logger := fakeZerologContext(newZerolog().With()).Logger()
+		b.ResetTimer()
+		b.RunParallel(func(pb *testing.PB) {
+			for pb.Next() {
+				if e := logger.Info(); e.Enabled() {
+					e.Msg(getMessage(0))
+				}
+			}
+		})
+	})
+	b.Run("rs/zerolog.Formatting", func(b *testing.B) {
+		logger := fakeZerologContext(newZerolog().With()).Logger()
+		b.ResetTimer()
+		b.RunParallel(func(pb *testing.PB) {
+			for pb.Next() {
+				logger.Info().Msgf("%v %v %v %s %v %v %v %v %v %s\n", fakeFmtArgs()...)
+			}
+		})
+	})
 }
 
 func BenchmarkAddingFields(b *testing.B) {
 	b.Logf("Logging with additional context at each log site.")
 	b.Run("jasnosoft/log", func(b *testing.B) {
 		h := jasonDiscard.New()
-		jasonLog.RegisterHandler(h, jasonLog.InfoLevel)
+		jasonLog.AddHandler(h, jasonLog.InfoLevel)
 		b.ResetTimer()
 		b.RunParallel(func(pb *testing.PB) {
 			for pb.Next() {
@@ -620,7 +620,7 @@ func BenchmarkAddingFields(b *testing.B) {
 
 	b.Run("jasnosoft/log", func(b *testing.B) {
 		h := jasonDiscard.New()
-		jasonLog.RegisterHandler(h, jasonLog.DebugLevel)
+		jasonLog.AddHandler(h, jasonLog.DebugLevel)
 		b.ResetTimer()
 		b.RunParallel(func(pb *testing.PB) {
 			for pb.Next() {
