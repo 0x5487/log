@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## [2.0.0-beta1] 2020-05-09
+- refactoring architecture
+- use JSON as default format
+- replace WithDafaultFields to hook
+- replace WithFields to strongly type field type
+- rename RegisterHandler to AddHandler
+- add Hook function
+- add WithContext func
+- handler interface has been changed
+- bulit-in handlers have been redesigned
+- performance has been improved
+- add more unit tests
+
+
 ## [1.0.4] 2020-04-30
 - fix gelf handler race condition issue
 - add standard field type

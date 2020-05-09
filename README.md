@@ -22,6 +22,33 @@ Use go get
 go get -u github.com/jasonsoft/log
 ```
 
+## Get Started
+
+```go
+package main
+
+import (
+	"errors"
+
+	"github.com/jasonsoft/log"
+	"github.com/jasonsoft/log/handlers/console"
+)
+
+func main() {
+	// use console handler to log all level logs
+	clog := console.New()
+	log.AddHandler(clog, log.AllLevels...)
+
+	// print message use DEBUG level
+	logger.Debug("hello world")
+}
+
+```
+
+
+
+
+
 ## Example
 
 ```go
