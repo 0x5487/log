@@ -2,7 +2,7 @@
 package discard
 
 import (
-	"github.com/jasonsoft/log"
+	"github.com/jasonsoft/log/v2"
 )
 
 // Handler implementation.

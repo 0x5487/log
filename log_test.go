@@ -7,10 +7,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jasonsoft/log"
-	"github.com/jasonsoft/log/handlers/discard"
-	"github.com/jasonsoft/log/handlers/memory"
-	"github.com/tj/assert"
+	"github.com/jasonsoft/log/v2"
+	"github.com/jasonsoft/log/v2/handlers/discard"
+	"github.com/jasonsoft/log/v2/handlers/memory"
+	"github.com/stretchr/testify/assert"
 )
 
 type Person struct {

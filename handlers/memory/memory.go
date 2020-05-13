@@ -5,7 +5,7 @@ package memory
 import (
 	"sync"
 
-	"github.com/jasonsoft/log"
+	"github.com/jasonsoft/log/v2"
 )
 
 // Handler implementation.

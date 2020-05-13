@@ -8,7 +8,7 @@ import (
 	"sync"
 
 	"github.com/fatih/color"
-	"github.com/jasonsoft/log"
+	"github.com/jasonsoft/log/v2"
 	colorable "github.com/mattn/go-colorable"
 )
 

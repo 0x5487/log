@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/jasonsoft/log/internal/json"
+	"github.com/jasonsoft/log/v2/internal/json"
 )
 
 var entryPool = &sync.Pool{

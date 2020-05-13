@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/jasonsoft/log"
+	"github.com/jasonsoft/log/v2"
 )
 
 // Gelf is an instance of the Gelf logger

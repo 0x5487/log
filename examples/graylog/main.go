@@ -3,35 +3,32 @@ package main
 import (
 	"errors"
 
-	"github.com/jasonsoft/log"
-	"github.com/jasonsoft/log/handlers/console"
-	"github.com/jasonsoft/log/handlers/gelf"
+	"github.com/jasonsoft/log/v2"
+	"github.com/jasonsoft/log/v2/handlers/console"
+	"github.com/jasonsoft/log/v2/handlers/gelf"
 )
 
 func main() {
 	clog := console.New()
-	log.RegisterHandler(clog, log.AllLevels...) // use console handler to log all level log
+	log.AddHandler(clog, log.AllLevels...) // use console handler to log all level log
 
 	graylog := gelf.New("tcp://10.1.1.181:12201")
-	log.RegisterHandler(graylog, log.AllLevels...)
+	log.AddHandler(graylog, log.AllLevels...)
 
 	defer log.Flush()
 
-	log.WithDefaultFields(log.Fields{
-		"app_id": "santa",
-		"host":   "taiwan",
-	})
+	logger := log.
+		Str("app_id", "santa").
+		Str("env", "dev")
 
 	defer log.Trace("time to run").Stop() // use trace to know how long it takes
 
 	log.Debug("hello world1")
 
-	fields := log.Fields{
-		"city":    "keelung",
-		"country": "taiwan",
-	}
-	log.WithFields(fields).Infof("more info") // log information with custom fileds
+	logger = logger.Str("city", "keelung").Str("name", "abc")
+
+	logger.Infof("more info") // log information with custom fileds
 
 	err := errors.New("something bad happened")
-	log.WithError(err).Error("oops...") // log error struct and print error message
+	log.Err(err).Error("oops...") // log error struct and print error message
 }

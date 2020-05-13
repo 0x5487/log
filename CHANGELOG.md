@@ -3,6 +3,7 @@
 - gelf will auto flush every 10 second
 - redesign hook func
 - add more func into context
+- fix go module v2 path issue
 
 ## [2.0.0-beta1] 2020-05-09
 - refactoring architecture

@@ -3,8 +3,8 @@ package main
 import (
 	"errors"
 
-	"github.com/jasonsoft/log"
-	"github.com/jasonsoft/log/handlers/console"
+	"github.com/jasonsoft/log/v2"
+	"github.com/jasonsoft/log/v2/handlers/console"
 )
 
 func main() {
