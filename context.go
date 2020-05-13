@@ -45,6 +45,18 @@ func (c Context) Infof(msg string, v ...interface{}) {
 	e.Infof(msg, v...)
 }
 
+// Warn level formatted message.
+func (c Context) Warn(msg string) {
+	e := newEntry(_logger, c.buf)
+	e.Warn(msg)
+}
+
+// Warnf level formatted message.
+func (c Context) Warnf(msg string, v ...interface{}) {
+	e := newEntry(_logger, c.buf)
+	e.Warnf(msg, v...)
+}
+
 // Error level formatted message
 func (c Context) Error(msg string) {
 	e := newEntry(_logger, c.buf)
@@ -55,6 +67,30 @@ func (c Context) Error(msg string) {
 func (c Context) Errorf(msg string, v ...interface{}) {
 	e := newEntry(_logger, c.buf)
 	e.Errorf(msg, v...)
+}
+
+// Panic level formatted message
+func (c Context) Panic(msg string) {
+	e := newEntry(_logger, c.buf)
+	e.Panic(msg)
+}
+
+// Panicf level formatted message
+func (c Context) Panicf(msg string, v ...interface{}) {
+	e := newEntry(_logger, c.buf)
+	e.Panicf(msg, v...)
+}
+
+// Fatal level formatted message
+func (c Context) Fatal(msg string) {
+	e := newEntry(_logger, c.buf)
+	e.Fatal(msg)
+}
+
+// Fatalf level formatted message
+func (c Context) Fatalf(msg string, v ...interface{}) {
+	e := newEntry(_logger, c.buf)
+	e.Fatalf(msg, v...)
 }
 
 func copyBytes(src []byte) []byte {

@@ -2,6 +2,7 @@
 ## [2.0.0-beta2] 
 - gelf will auto flush every 10 second
 - redesign hook func
+- add more func into context
 
 ## [2.0.0-beta1] 2020-05-09
 - refactoring architecture
