@@ -393,7 +393,7 @@ func handler(e *Entry) {
 
 		// call hook interface
 		for _, hooker := range _logger.hooks {
-			hooker.Hook(newEntry)
+			hooker(newEntry)
 		}
 
 		err := h.BeforeWriting(newEntry)

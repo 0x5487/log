@@ -22,14 +22,12 @@ type Flusher interface {
 	Flush() error
 }
 
-// Hooker is an interface that allow us to do something before writing
-type Hooker interface {
-	Hook(*Entry) error
-}
+// Hookfunc is an func that allow us to do something before writing
+type Hookfunc func(*Entry) error
 
 type logger struct {
 	handles              []Handler
-	hooks                []Hooker
+	hooks                []Hookfunc
 	leveledHandlers      map[Level][]Handler
 	cacheLeveledHandlers func(level Level) []Handler
 	rwMutex              sync.RWMutex
@@ -97,7 +95,7 @@ func RemoveAllHandlers() {
 }
 
 // AddHook adds a new Hook to log entry
-func AddHook(hook Hooker) error {
+func AddHook(hook Hookfunc) error {
 	_logger.rwMutex.Lock()
 	defer _logger.rwMutex.Unlock()
 

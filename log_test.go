@@ -284,7 +284,10 @@ func TestHook(t *testing.T) {
 	h := memory.New()
 	log.AddHandler(h, log.AllLevels...)
 
-	log.AddHook(&AppHook{})
+	log.AddHook(func(e *log.Entry) error {
+		e.Str("app_id", "santa").Str("env", "dev")
+		return nil
+	})
 
 	log.Info("upload complete")
 
