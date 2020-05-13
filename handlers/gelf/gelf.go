@@ -120,6 +120,7 @@ func (g *Gelf) manageConnections() {
 				stdlog.Println("gelf: created a connection")
 			}
 			g.mutex.Unlock()
+			_ = g.bufferedWriter.Flush()
 			time.Sleep(10 * time.Second)
 		}
 	}()
