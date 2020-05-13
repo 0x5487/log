@@ -19,7 +19,7 @@ It is a simple structured logging package for Go.
 Use go get 
 
 ```go
-go get -u github.com/jasonsoft/log
+go get -u github.com/jasonsoft/log/v2
 ```
 
 ## Get Started
