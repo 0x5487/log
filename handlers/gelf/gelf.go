@@ -104,7 +104,7 @@ func (g *Gelf) manageConnections() {
 		g.bufferedWriter = bufio.NewWriter(g.conn)
 	}
 
-	// check connection status every 1 second
+	// check connection status every 10 second
 	go func() {
 		for {
 			g.mutex.Lock()
