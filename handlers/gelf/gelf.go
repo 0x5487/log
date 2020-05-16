@@ -119,8 +119,8 @@ func (g *Gelf) manageConnections() {
 				g.bufferedWriter = bufio.NewWriter(g.conn)
 				stdlog.Println("gelf: created a connection")
 			}
-			g.mutex.Unlock()
 			_ = g.bufferedWriter.Flush()
+			g.mutex.Unlock()
 			time.Sleep(10 * time.Second)
 		}
 	}()
