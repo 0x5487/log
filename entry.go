@@ -411,8 +411,13 @@ func handler(e *Entry) {
 
 		err = h.Write(newEntry.buf)
 		if err != nil {
-			stdlog.Printf("log: log write failed: %v", err)
+			if ErrorHandler != nil {
+				ErrorHandler(err)
+			} else {
+				stdlog.Printf("log: log write failed: %v", err)
+			}
 		}
+
 		putEntry(newEntry)
 	}
 

@@ -36,6 +36,31 @@ func TestAddHandlers(t *testing.T) {
 	assert.Equal(t, `{"level":"INFO","msg":"info"}`+"\n", string(h2.Out))
 }
 
+type ErrHandler struct {
+}
+
+func (h *ErrHandler) BeforeWriting(e *log.Entry) error {
+	return nil
+}
+
+func (h *ErrHandler) Write(bytes []byte) error {
+	return errors.New("oops")
+}
+
+func TestErrorHandler(t *testing.T) {
+	log.RemoveAllHandlers()
+	h1 := &ErrHandler{}
+	log.AddHandler(h1, log.AllLevels...)
+
+	isErr := false
+	log.ErrorHandler = func(err error) {
+		isErr = true
+	}
+
+	log.Debug("aaa")
+	assert.Equal(t, true, isErr)
+}
+
 func TestLog(t *testing.T) {
 	log.RemoveAllHandlers()
 	h := memory.New()
