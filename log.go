@@ -280,33 +280,6 @@ func Flush() {
 	}
 }
 
-// // WithFields returns a log Entry with fields set
-// func WithFields(fields Fields) *Entry {
-// 	e := newEntry(_logger)
-// 	return e.WithFields(fields)
-// }
-
-// // WithField returns a new entry with the `key` and `value` set.
-// func WithField(key string, value interface{}) *Entry {
-// 	e := newEntry(_logger)
-// 	return e.WithField(key, value)
-// }
-
-// WithDefaultFields adds fields to every entry instance
-// func WithDefaultFields(fields Fields) {
-// 	f := make([]Fields, 0, len(_logger.defaultFields)+len(fields))
-// 	f = append(f, _logger.defaultFields...)
-// 	f = append(f, fields)
-
-// 	_logger.defaultFields = f
-// }
-
-// WithError returns a new entry with the "error" set to `err`.
-// func WithError(err error) *Entry {
-// 	e := newEntry(_logger)
-// 	return e.WithError((err))
-// }
-
 // Trace returns a new entry with a Stop method to fire off
 // a corresponding completion log, useful with defer.
 func Trace(msg string) *Entry {

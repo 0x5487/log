@@ -19,6 +19,7 @@ type Gelf struct {
 	conn           net.Conn
 	bufferedWriter *bufio.Writer
 	url            *url.URL
+	isActive       bool
 }
 
 // New create a new Gelf instance
@@ -28,7 +29,8 @@ func New(connectionString string) log.Handler {
 		panic(fmt.Errorf("graylog connectionString is wrong: %v", err))
 	}
 	g := &Gelf{
-		url: url,
+		url:      url,
+		isActive: true,
 	}
 	g.manageConnections()
 	return g
@@ -84,6 +86,7 @@ func (g *Gelf) Flush() error {
 	defer g.mutex.Unlock()
 
 	_ = g.bufferedWriter.Flush()
+	g.isActive = false
 
 	return g.close()
 }
@@ -108,6 +111,9 @@ func (g *Gelf) manageConnections() {
 	go func() {
 		for {
 			g.mutex.Lock()
+			if g.isActive == false {
+				return
+			}
 			if g.conn == nil {
 				// TODO: tcp is hard-code at the point, we need to remove that later
 				newConn, err := net.Dial("tcp", g.url.Host)
