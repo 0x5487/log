@@ -37,9 +37,6 @@ func New(connectionString string) log.Handler {
 var empty byte
 
 func (g *Gelf) close() error {
-	g.mutex.Lock()
-	defer g.mutex.Unlock()
-
 	if g.conn != nil {
 		_ = g.conn.Close()
 		g.conn = nil
@@ -50,7 +47,7 @@ func (g *Gelf) close() error {
 // BeforeWriting handles the log entry
 func (g *Gelf) BeforeWriting(e *log.Entry) error {
 	e.Str("version", "1.1").
-		Uint8("level", toGelfLevel(e.Level)).
+		Uint8("level", gelfLevel(e.Level)).
 		Str("short_message", e.Message)
 
 	e.Message = ""
@@ -60,10 +57,11 @@ func (g *Gelf) BeforeWriting(e *log.Entry) error {
 
 // Write handles the log entry
 func (g *Gelf) Write(bytes []byte) error {
+	g.mutex.Lock()
+	defer g.mutex.Unlock()
+
 	if g.conn != nil {
-		g.mutex.Lock()
 		_, err := g.bufferedWriter.Write(append(bytes, empty)) // when we use tcp, we need to add null byte in the end.
-		g.mutex.Unlock()
 		if err != nil {
 			_ = g.close()
 			return fmt.Errorf("send log to graylog failed: %w", err)
@@ -82,8 +80,9 @@ func (g *Gelf) Write(bytes []byte) error {
 // Flush all buffer data and close connection
 func (g *Gelf) Flush() error {
 	g.mutex.Lock()
+	defer g.mutex.Unlock()
+
 	_ = g.bufferedWriter.Flush()
-	g.mutex.Unlock()
 
 	return g.close()
 }
@@ -104,7 +103,7 @@ func (g *Gelf) manageConnections() {
 		g.bufferedWriter = bufio.NewWriter(g.conn)
 	}
 
-	// check connection status every 10 second
+	// check connection status every 1 second
 	go func() {
 		for {
 			g.mutex.Lock()
@@ -121,12 +120,12 @@ func (g *Gelf) manageConnections() {
 			}
 			_ = g.bufferedWriter.Flush()
 			g.mutex.Unlock()
-			time.Sleep(10 * time.Second)
+			time.Sleep(1 * time.Second)
 		}
 	}()
 }
 
-func toGelfLevel(level log.Level) uint8 {
+func gelfLevel(level log.Level) uint8 {
 	switch level {
 	case log.DebugLevel:
 		return 7
