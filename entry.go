@@ -38,7 +38,7 @@ func newEntry(l *logger, buf []byte) *Entry {
 		e.buf = e.buf[:0]
 		e.buf = enc.AppendBeginMarker(e.buf)
 	} else {
-		e.buf = buf // race condition because it use context's buf.  However, we create new buf within handler func
+		e.buf = buf // race condition here because it use context's buf.  However, we create new buf within handler func
 	}
 
 	return e

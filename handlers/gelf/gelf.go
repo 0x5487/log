@@ -48,7 +48,8 @@ func (g *Gelf) close() error {
 func (g *Gelf) BeforeWriting(e *log.Entry) error {
 	e.Str("version", "1.1").
 		Uint8("level", gelfLevel(e.Level)).
-		Str("short_message", e.Message)
+		Str("short_message", e.Message).
+		Str("timestamp", time.Now().UTC().Format(time.RFC3339))
 
 	e.Message = ""
 	return nil

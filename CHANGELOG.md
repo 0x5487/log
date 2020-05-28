@@ -1,4 +1,7 @@
 # CHANGELOG
+## [2.0.0-beta.3] 
+- add SaveToDefault feature
+
 ## [2.0.0-beta.2] 2020-05-16
 - gelf will auto flush every 10 second
 - redesign hook func

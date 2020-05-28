@@ -318,6 +318,26 @@ func TestGoroutineSafe(t *testing.T) {
 	wg.Wait()
 }
 
+func TestSaveToDefaultContext(t *testing.T) {
+	log.RemoveAllHandlers()
+	h := memory.New()
+	log.AddHandler(h, log.AllLevels...)
+
+	log.
+		Str("app", "santa").
+		Str("env", "dev").
+		SaveToDefault()
+
+	log.Debug("hello")
+	assert.Equal(t, `{"app":"santa","env":"dev","level":"DEBUG","msg":"hello"}`+"\n", string(h.Out))
+
+	log.Bool("answer", true).SaveToDefault()
+	log.Int32("count", 3).Info("hello2")
+
+	//t.Log(string(h.Out))
+	assert.Equal(t, `{"app":"santa","env":"dev","answer":true,"count":3,"level":"INFO","msg":"hello2"}`+"\n", string(h.Out))
+}
+
 func BenchmarkDisabledAddingFields(b *testing.B) {
 	b.Logf("Logging without any structured context.")
 
@@ -331,5 +351,4 @@ func BenchmarkDisabledAddingFields(b *testing.B) {
 			}
 		})
 	})
-
 }

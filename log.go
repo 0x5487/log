@@ -31,6 +31,7 @@ type logger struct {
 	leveledHandlers      map[Level][]Handler
 	cacheLeveledHandlers func(level Level) []Handler
 	rwMutex              sync.RWMutex
+	buf                  []byte
 }
 
 func new() *logger {
@@ -91,6 +92,7 @@ func RemoveAllHandlers() {
 
 	_logger.leveledHandlers = map[Level][]Handler{}
 	_logger.handles = []Handler{}
+	_logger.hooks = []Hookfunc{}
 	_logger.cacheLeveledHandlers = _logger.getLeveledHandlers()
 }
 
@@ -105,55 +107,55 @@ func AddHook(hook Hookfunc) error {
 
 // Debug level formatted message
 func Debug(msg string) {
-	e := newEntry(_logger, nil)
+	e := newEntry(_logger, _logger.buf)
 	e.Debug(msg)
 }
 
 // Debugf level formatted message
 func Debugf(msg string, v ...interface{}) {
-	e := newEntry(_logger, nil)
+	e := newEntry(_logger, _logger.buf)
 	e.Debugf(msg, v...)
 }
 
 // Info level formatted message
 func Info(msg string) {
-	e := newEntry(_logger, nil)
+	e := newEntry(_logger, _logger.buf)
 	e.Info(msg)
 }
 
 // Infof level formatted message
 func Infof(msg string, v ...interface{}) {
-	e := newEntry(_logger, nil)
+	e := newEntry(_logger, _logger.buf)
 	e.Infof(msg, v...)
 }
 
 // Warn level formatted message
 func Warn(msg string) {
-	e := newEntry(_logger, nil)
+	e := newEntry(_logger, _logger.buf)
 	e.Warn(msg)
 }
 
 // Warnf level formatted message
 func Warnf(msg string, v ...interface{}) {
-	e := newEntry(_logger, nil)
+	e := newEntry(_logger, _logger.buf)
 	e.Warnf(msg, v...)
 }
 
 // Error level formatted message
 func Error(msg string) {
-	e := newEntry(_logger, nil)
+	e := newEntry(_logger, _logger.buf)
 	e.Error(msg)
 }
 
 // Errorf level formatted message
 func Errorf(msg string, v ...interface{}) {
-	e := newEntry(_logger, nil)
+	e := newEntry(_logger, _logger.buf)
 	e.Errorf(msg, v...)
 }
 
 // Panic level formatted message
 func Panic(msg string) {
-	e := newEntry(_logger, nil)
+	e := newEntry(_logger, _logger.buf)
 	e.Panic(msg)
 }
 
@@ -165,13 +167,13 @@ func Panicf(msg string, v ...interface{}) {
 
 // Fatal level formatted message, followed by an exit.
 func Fatal(msg string) {
-	e := newEntry(_logger, nil)
+	e := newEntry(_logger, _logger.buf)
 	e.Fatal(msg)
 }
 
 // Fatalf level formatted message, followed by an exit.
 func Fatalf(msg string, v ...interface{}) {
-	e := newEntry(_logger, nil)
+	e := newEntry(_logger, _logger.buf)
 	e.Fatalf(msg, v...)
 }
 

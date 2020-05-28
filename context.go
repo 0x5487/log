@@ -16,9 +16,30 @@ func newContext(l *logger) Context {
 		logger: l,
 	}
 
-	c.buf = make([]byte, 0, 500)
-	c.buf = enc.AppendBeginMarker(c.buf)
+	if len(l.buf) > 0 {
+		c.buf = copyBytes(l.buf)
+	} else {
+		c.buf = make([]byte, 0, 500)
+		c.buf = enc.AppendBeginMarker(c.buf)
+	}
+
 	return c
+}
+
+func copyBytes(src []byte) []byte {
+	newBuf := make([]byte, len(src))
+	if len(src) > 0 {
+		copy(newBuf, src)
+	}
+	return newBuf
+}
+
+// SaveToDefault save the current context to default logger and these context to be printed with every entry
+func (c Context) SaveToDefault() {
+	c.logger.rwMutex.Lock()
+	defer c.logger.rwMutex.Unlock()
+
+	c.logger.buf = copyBytes(c.buf)
 }
 
 // Debug level formatted message.
@@ -91,14 +112,6 @@ func (c Context) Fatal(msg string) {
 func (c Context) Fatalf(msg string, v ...interface{}) {
 	e := newEntry(_logger, c.buf)
 	e.Fatalf(msg, v...)
-}
-
-func copyBytes(src []byte) []byte {
-	newBuf := make([]byte, len(src))
-	if len(src) > 0 {
-		copy(newBuf, src)
-	}
-	return newBuf
 }
 
 // Str add string field to current context
