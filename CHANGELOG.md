@@ -1,5 +1,5 @@
 # CHANGELOG
-## [2.0.0-beta.3] 
+## [2.0.0-beta.3] 2020-08-07
 - add SaveToDefault feature
 - add json handler
 - centeral error handling 
