@@ -30,11 +30,6 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
 
-      - name: Run Gosec Security Scanner
-        uses: securego/gosec@master
-        with:
-          args: ./...
-
       - name: Test Go code
         run: go test -race -coverprofile=cover.out -covermode=atomic
 
