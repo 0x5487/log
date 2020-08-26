@@ -143,6 +143,11 @@ func (e *Entry) Warnf(msg string, v ...interface{}) {
 func (e *Entry) Error(msg string) {
 	e.Level = ErrorLevel
 	e.Message = msg
+
+	if AutoStaceTrace {
+		e = e.StackTrace()
+	}
+
 	handler(e)
 }
 
@@ -150,6 +155,11 @@ func (e *Entry) Error(msg string) {
 func (e *Entry) Errorf(msg string, v ...interface{}) {
 	e.Level = ErrorLevel
 	e.Message = fmt.Sprintf(msg, v...)
+
+	if AutoStaceTrace {
+		e = e.StackTrace()
+	}
+
 	handler(e)
 }
 
@@ -157,6 +167,11 @@ func (e *Entry) Errorf(msg string, v ...interface{}) {
 func (e *Entry) Panic(msg string) {
 	e.Level = PanicLevel
 	e.Message = msg
+
+	if AutoStaceTrace {
+		e = e.StackTrace()
+	}
+
 	handler(e)
 	panic(msg)
 }
@@ -165,6 +180,11 @@ func (e *Entry) Panic(msg string) {
 func (e *Entry) Panicf(msg string, v ...interface{}) {
 	e.Level = PanicLevel
 	e.Message = fmt.Sprintf(msg, v...)
+
+	if AutoStaceTrace {
+		e = e.StackTrace()
+	}
+
 	handler(e)
 	panic(msg)
 }
@@ -173,6 +193,10 @@ func (e *Entry) Panicf(msg string, v ...interface{}) {
 func (e *Entry) Fatal(msg string) {
 	e.Level = FatalLevel
 	e.Message = msg
+
+	if AutoStaceTrace {
+		e = e.StackTrace()
+	}
 	handler(e)
 	os.Exit(1)
 }
@@ -181,6 +205,10 @@ func (e *Entry) Fatal(msg string) {
 func (e *Entry) Fatalf(msg string, v ...interface{}) {
 	e.Level = FatalLevel
 	e.Message = fmt.Sprintf(msg, v...)
+
+	if AutoStaceTrace {
+		e = e.StackTrace()
+	}
 	handler(e)
 	os.Exit(1)
 }
@@ -385,6 +413,16 @@ func (e *Entry) Interface(key string, val interface{}) *Entry {
 	return e
 }
 
+// StackTrace adds stack_trace field to the current context
+func (e *Entry) StackTrace() *Entry {
+	if e == nil {
+		return e
+	}
+	e.buf = enc.AppendKey(e.buf, "stack_trace")
+	e.buf = enc.AppendString(e.buf, getStackTrace())
+	return e
+}
+
 func handler(e *Entry) {
 
 	for _, h := range e.logger.cacheLeveledHandlers(e.Level) {
@@ -393,7 +431,7 @@ func handler(e *Entry) {
 
 		// call hook interface
 		for _, hooker := range _logger.hooks {
-			hooker(newEntry)
+			_ = hooker(newEntry)
 		}
 
 		err := h.BeforeWriting(newEntry)

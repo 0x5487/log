@@ -82,7 +82,7 @@ func main() {
 	// log information with custom fileds
 	logger.Str("city", "keelung").Info("more info")
 
-	// log error struct and print error message
+	// log error struct and print error message, stack trace will also be recorded
 	err := errors.New("something bad happened")
 	logger.Err(err).Error("oops...")
 }

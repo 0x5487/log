@@ -1,0 +1,14 @@
+# https://taskfile.dev
+
+version: '3'
+
+tasks:
+  lint:
+    cmds:
+      - docker run --rm -v  ${PWD}:/data cytopia/golint .
+  test:
+    cmds:
+      - go test -race -v
+
+
+      docker run -v ${PWD}:/opt/mount/src/log guardrails/gosec:latest

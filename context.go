@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// Context use for meta data
 type Context struct {
 	logger *logger
 	buf    []byte
@@ -247,6 +248,14 @@ func (c Context) Err(err error) Context {
 	c.buf = copyBytes(c.buf)
 	c.buf = enc.AppendKey(c.buf, "error")
 	c.buf = enc.AppendString(c.buf, fmt.Sprintf("%+v", err))
+	return c
+}
+
+// StackTrace adds stack_trace field to the current context
+func (c Context) StackTrace() Context {
+	c.buf = copyBytes(c.buf)
+	c.buf = enc.AppendKey(c.buf, "stack_trace")
+	c.buf = enc.AppendString(c.buf, getStackTrace())
 	return c
 }
 

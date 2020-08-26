@@ -2,7 +2,10 @@ package log
 
 import (
 	"context"
+	"fmt"
 	stdlog "log"
+	"runtime"
+	"strings"
 	"sync"
 )
 
@@ -14,6 +17,10 @@ var (
 	// output. If not set, an error is printed on the stderr. This handler must
 	// be thread safe and non-blocking.
 	ErrorHandler func(err error)
+
+	// AutoStaceTrace add stack trace into entry when use `Error`, `Panic`, `Fatal` level.
+	// Default: true
+	AutoStaceTrace = true
 )
 
 // Handler is an interface that log handlers need to be implemented
@@ -313,4 +320,23 @@ func FromContext(ctx context.Context) Context {
 	}
 
 	return v.(Context)
+}
+
+func getStackTrace() string {
+	stackBuf := make([]uintptr, 50)
+	length := runtime.Callers(3, stackBuf[:])
+	stack := stackBuf[:length]
+
+	var b strings.Builder
+	frames := runtime.CallersFrames(stack)
+	for {
+		frame, more := frames.Next()
+		if !strings.Contains(frame.File, "runtime/") {
+			_, _ = b.WriteString(fmt.Sprintf("\n\tFile: %s, Line: %d. Function: %s", frame.File, frame.Line, frame.Function))
+		}
+		if !more {
+			break
+		}
+	}
+	return b.String()
 }

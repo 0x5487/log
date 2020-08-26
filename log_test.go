@@ -63,6 +63,8 @@ func TestErrorHandler(t *testing.T) {
 
 func TestLog(t *testing.T) {
 	log.RemoveAllHandlers()
+	log.AutoStaceTrace = false
+
 	h := memory.New()
 	log.AddHandler(h, log.AllLevels...)
 
@@ -115,6 +117,8 @@ func TestLog(t *testing.T) {
 		}()
 		log.Panicf("panic %s", "hello")
 	})
+
+	log.AutoStaceTrace = true
 
 }
 
@@ -272,6 +276,7 @@ func TestStandardFields(t *testing.T) {
 
 func TestAdvancedFields(t *testing.T) {
 	log.RemoveAllHandlers()
+	log.AutoStaceTrace = false
 
 	h := memory.New()
 	log.AddHandler(h, log.AllLevels...)
@@ -282,6 +287,7 @@ func TestAdvancedFields(t *testing.T) {
 	//t.Log(string(h.Out))
 	assert.Equal(t, `{"error":"something bad happened","level":"ERROR","msg":"too bad"}`+"\n", string(h.Out))
 
+	log.AutoStaceTrace = true
 }
 
 // func TestTrace(t *testing.T) {

@@ -1,8 +1,15 @@
 # CHANGELOG
+## [2.0.0-beta.4] 
+- add `StackTrace()` fn
+- `error`, `panic`, and `fatal` level add stack_trace into entry by default, but it can be turn off by `log.AutoStackTrace = false` 
+- add task runner (Taskfile.yml)
+- add gosec scanner to github workflow
+- update github workflow to v2
+
 ## [2.0.0-beta.3] 2020-08-07
 - add SaveToDefault feature
 - add json handler
-- centeral error handling 
+- centralized error handling 
 
 ## [2.0.0-beta.2] 2020-05-16
 - gelf will auto flush every 10 second
