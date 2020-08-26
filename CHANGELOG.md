@@ -3,7 +3,6 @@
 - add `StackTrace()` fn
 - `error`, `panic`, and `fatal` level add stack_trace into entry by default, but it can be turn off by `log.AutoStackTrace = false` 
 - add task runner (Taskfile.yml)
-- add gosec scanner to github workflow
 - update github workflow to v2
 
 ## [2.0.0-beta.3] 2020-08-07
