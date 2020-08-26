@@ -1,5 +1,5 @@
 # CHANGELOG
-## [2.0.0-beta.4] 
+## [2.0.0-beta.4] 2020-08-26
 - add `StackTrace()` fn
 - `error`, `panic`, and `fatal` level add stack_trace into entry by default, but it can be turn off by `log.AutoStackTrace = false` 
 - add task runner (Taskfile.yml)
